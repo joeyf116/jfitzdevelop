@@ -236,7 +236,7 @@ body {
     height: 100%;
     width: 100%;
     background-color: #009D9A;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     padding: 5em 5px;

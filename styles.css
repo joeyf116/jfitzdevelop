@@ -380,3 +380,12 @@ body {
 .footer--wrapper p {
     text-align: center;
 }
+
+#footer-tag {
+    transition: all .2s;
+}
+
+#footer-tag:hover {
+    font-weight: bold;
+    text-decoration: underline;
+}

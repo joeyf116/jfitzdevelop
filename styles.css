@@ -3,7 +3,9 @@
 #26F7B2 Neonish
 #D3EDEA Light
 #009D9A Mid */
-
+html {
+    padding: 10px 10px;
+}
 body {
     height: 100%;
     width: 100%;

@@ -239,6 +239,49 @@ body {
     text-align: center;
 }
 
+/* Timeline styling */
+.timeline--wrapper {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    justify-content: flex-start;
+    align-items: left;
+    border-top: 1px solid #09333f;
+}
+
+.timeline--wrapper h2 {
+    margin-top: 1em;
+    text-decoration: underline;
+}
+
+.timeline-boxes {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.timeline-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    border: 1px solid #ececec;
+    background-color: #ececec;
+    padding: 12px 12px;
+    margin: 8px;
+    max-width: 25em;
+}
+
+.timeline-content h6 {
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.timeline-content p {
+    padding: 0 0px;
+}
+
 /* Experience Styling */
 
 .experience--wrapper {

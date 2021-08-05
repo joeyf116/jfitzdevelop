@@ -247,8 +247,9 @@ body {
     height: 100%;
     width: 100%;
     background-color: #009D9A;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
+    text-align: center;
     flex-wrap: wrap;
     padding: 5em 5px;
 }
@@ -256,7 +257,7 @@ body {
 .experience-card {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: center;
     padding: 3px 3px;
     border: 2px solid white;
@@ -267,6 +268,7 @@ body {
     padding: 10px 10px;
     color: white;
     margin: .3em;
+    box-shadow: 15px 15px 15px #09333f;
 }
 
 .experience-image img{
@@ -295,11 +297,17 @@ body {
     height: 100%;
 }
 
+.contact--wrapper h2 {
+    text-decoration: underline;
+}
 .contact-form {
     display: flex;
     flex-direction: column;
     align-items: left;
     justify-content: center;
+    border: 1px solid #ececec;
+    box-shadow: 15px 15px 15px #ececec;
+    padding: 12px 12px;
 }
 
 .field {
@@ -373,6 +381,7 @@ body {
 .footer--wrapper ul li a img{
     height: 2em;
     width: 2em;
+    opacity: .8;
 }
 
 .footer--wrapper p {
@@ -386,4 +395,16 @@ body {
 #footer-tag:hover {
     font-weight: bold;
     text-decoration: underline;
+}
+
+.footer--wrapper img:hover {
+    height: 2.1em;
+    width: 2.1em;
+    opacity: 1;
+}
+
+.footer--wrapper a:hover img{
+    height: 2.1em;
+    width: 2.1em;
+    opacity: 1;
 }

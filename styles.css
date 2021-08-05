@@ -330,13 +330,9 @@ body {
     transition: all .4s;
 }
 
-#button:hover {
+ #button:hover {
     background-color: #26F7B2;
-    /* color: white; */
-}
-
-.button-hover:hover {
-    background-color: #26F7B2;
+    font-weight: bold;
 }
 
 /* Footer Styling */

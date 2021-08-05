@@ -297,9 +297,6 @@ body {
     height: 100%;
 }
 
-.contact--wrapper h2 {
-    text-decoration: underline;
-}
 .contact-form {
     display: flex;
     flex-direction: column;

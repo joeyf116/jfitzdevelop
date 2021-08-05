@@ -79,7 +79,7 @@ body {
     font-size: larger;
 }
 
-.home--wrapper .card button {
+.home--wrapper .card a {
     margin-top: 2em;
     padding: 8px 8px;
     color: #09333f;
@@ -89,6 +89,15 @@ body {
     font-weight: bold;
     letter-spacing: 2px;
     z-index: 2;
+    text-decoration: none;
+}
+
+#contact-tag {
+    transition: all .4s;
+}
+
+#contact-tag:hover {
+    background-color: #26F7B2;
 }
 
 /* Home wrapper animation */
@@ -324,6 +333,10 @@ body {
 #button:hover {
     background-color: #26F7B2;
     /* color: white; */
+}
+
+.button-hover:hover {
+    background-color: #26F7B2;
 }
 
 /* Footer Styling */

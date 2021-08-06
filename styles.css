@@ -437,6 +437,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    letter-spacing: 2px;
 }
 .footer-socials-text:hover {
     font-size: 1.1em;

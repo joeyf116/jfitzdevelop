@@ -1,9 +1,9 @@
  /* Color Pallette */
 :root {
-    --main-dark-color: #09333f;
-    --main-hover-color: #26F7B2;
+    --main-dark-color: #1D2D50;
+    --main-hover-color: #FCDAB7;
     --main-light-color: #D3EDEA;
-    --main-mid-color: #009D9A;
+    --main-mid-color: #133B5C;
 }
 
 html {
@@ -113,10 +113,10 @@ body {
     left: -50;
     height: 20%;
     width: 150%;
-    background-color: var(--main-light-color);
+    background-color: #133B5C;
     position: absolute;
     animation-name: homeAnimation2;
-    animation-duration: 10s;
+    animation-duration: 15s;
     animation-iteration-count: infinite;
     z-index: 5;
     border-top: none;
@@ -129,10 +129,10 @@ body {
     height: 20%;
     width: 150%;
     color: #272727;
-    background-color: #009D9A;
+    background-color: #FCDAB7;
     position: absolute;
     animation-name: homeAnimation;
-    animation-duration: 10s;
+    animation-duration: 15s;
     animation-iteration-count: infinite;
     z-index: 5;
     border-top: none;
@@ -150,7 +150,7 @@ body {
     }
     50%{
         transform: translateX(100%);
-        background-color: var(--main-light-color);
+        background-color: #133B5C;
     }
     75%{
         transform: translateX(0%);
@@ -168,7 +168,7 @@ body {
     }
     50%{
         transform: translateX(-100%);
-        background-color: #009D9A;
+        background-color: #FCDAB7;
     }
     75%{
         transform: translateX(0%);
@@ -292,7 +292,7 @@ body {
     flex-direction: row;
     height: 100%;
     width: 100%;
-    background-color: #009D9A;
+    background-color: var(--main-mid-color);
     justify-content: space-evenly;
     align-items: center;
     text-align: center;

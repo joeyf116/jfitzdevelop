@@ -8,7 +8,7 @@ export const hotspots: { chapter: ChapterId; label: string; position: [number, n
   { chapter: 'skills', label: 'Skills', position: [-1.4, 3.95, -2.8] },
   { chapter: 'experience', label: 'Experience', position: [-2.9, 3.25, -2.2] },
   { chapter: 'projects', label: 'Projects', position: [0.3, 3.05, -2.5] },
-  { chapter: 'hobbies', label: 'Hobbies', position: [1.4, 1.75, 0.6] },
+  { chapter: 'hobbies', label: 'Hobbies', position: [-2, 2.05, -0.2] },
   { chapter: 'contact', label: 'Contact', position: [-0.85, 1.85, -1.8] },
 ]
 

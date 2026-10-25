@@ -143,12 +143,17 @@ export const hobbies = [
   {
     name: 'Guitar',
     emoji: '🎸',
-    description: 'The acoustic by the plant gets picked up whenever I need to step away from a screen.',
+    description: 'I’ve been playing for around 20 years. That’s a Taylor 214ce on the stand by the window.',
+  },
+  {
+    name: 'Brazilian Jiu-Jitsu',
+    emoji: '🥋',
+    description: 'Black belt in 10th Planet Jiu-Jitsu. The belt on the wall gets earned back every week on the mat.',
   },
   {
     name: 'Goose',
     emoji: '🐕',
-    description: 'My dog and official office mate. Long legs, big grin, and strong opinions about walk time.',
+    description: 'My dog, a European village dog I adopted while stationed in Italy. Now he’s my official office mate.',
   },
 ]
 

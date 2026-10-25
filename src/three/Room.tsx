@@ -1,4 +1,5 @@
 import { palette } from '../theme/palette'
+import { BlackBelt } from './BlackBelt'
 import { Goose } from './Goose'
 import { Guitar } from './Guitar'
 import { Interactive } from './Interactive'
@@ -237,15 +238,22 @@ export function Room({ animate }: { animate: boolean }) {
         <Phone />
       </Interactive>
       {/* Hobbies: the guitar and Goose both open the same chapter. */}
-      <Interactive chapter="hobbies" animate={animate} glow={[1.4, 1.3, 1.15]}>
+      {/* Hobbies, grouped along the left wall around the window: Goose's bed under it,
+          the black belt and the guitar beside it. */}
+      <Interactive chapter="hobbies" animate={animate} glow={[-1.8, 1.5, -0.1]}>
         {(hovered) => (
-          <group position={[1.4, 0, 0.6]} rotation={[0, 0.75, 0]}>
+          <group position={[-2, 0, -0.4]} rotation={[0, 0.15, 0]}>
             <Goose animate={animate} excited={hovered} />
           </group>
         )}
       </Interactive>
-      <Interactive chapter="hobbies" animate={animate} glow={[2.3, 1.4, -0.5]}>
-        <group position={[2.5, 0, -1.05]} rotation={[0, -0.5, 0]}>
+      <Interactive chapter="hobbies" animate={animate} glow={[-2.4, 3, 1.05]}>
+        <group position={[-ROOM / 2, 3.6, 1.05]} rotation={[0, Math.PI / 2, 0]}>
+          <BlackBelt />
+        </group>
+      </Interactive>
+      <Interactive chapter="hobbies" animate={animate} glow={[-2, 1.4, 1.1]}>
+        <group position={[-2.45, 0, 1.1]} rotation={[0, Math.PI / 2 - 0.35, 0]}>
           <Guitar />
         </group>
       </Interactive>

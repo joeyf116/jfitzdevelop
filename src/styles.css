@@ -1,0 +1,464 @@
+/* Mobile-first: base rules target small screens; media queries add layout as space grows.
+   The 3D room is fixed behind everything; chapters scroll over it and drive the camera. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--nav-height);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.15;
+  font-weight: 650;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+[tabindex='-1']:focus {
+  outline: none;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.small {
+  font-size: var(--text-sm);
+}
+
+.prose {
+  margin: 0 0 var(--space-6);
+  color: var(--color-text-muted);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -3rem;
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border-radius: var(--radius-sm);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+/* Backdrop */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100lvh;
+}
+
+.backdrop[data-fallback='true'] {
+  background: radial-gradient(circle at 60% 40%, var(--color-accent-soft), transparent 60%);
+}
+
+/* Buttons */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 550;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease-out), background-color var(--duration) var(--ease-out);
+}
+
+.button:hover {
+  border-color: var(--color-text-muted);
+}
+
+.button--primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.button--primary:hover {
+  background: color-mix(in srgb, var(--color-accent) 85%, white);
+  border-color: transparent;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/* Nav */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.nav__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--content-width);
+  min-height: var(--nav-height);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.nav__brand {
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.nav__links {
+  display: none;
+  flex-basis: 100%;
+  flex-direction: column;
+  padding-bottom: var(--space-3);
+}
+
+.nav__links[data-open='true'] {
+  display: flex;
+}
+
+.nav__links a {
+  padding: var(--space-3) 0;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--duration);
+}
+
+.nav__links a:hover,
+.nav__links a[aria-current] {
+  color: var(--color-text);
+}
+
+/* Chapters: transparent to the pointer so the room behind stays clickable. */
+main {
+  position: relative;
+  z-index: 10;
+}
+
+.chapter {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100svh;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  /* Leave the top of the screen for the object the camera is looking at. */
+  padding: 58svh var(--space-4) var(--space-8);
+  pointer-events: none;
+}
+
+.panel {
+  padding: var(--space-6);
+  background: color-mix(in srgb, var(--color-surface) 86%, transparent);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  pointer-events: auto;
+}
+
+.panel__title {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+}
+
+/* Intro */
+.chapter--intro {
+  position: relative;
+  justify-content: flex-start;
+  min-height: calc(100svh - var(--nav-height));
+  padding-top: var(--space-8);
+}
+
+.intro {
+  max-width: 34rem;
+}
+
+.intro .button {
+  pointer-events: auto;
+}
+
+.intro__title {
+  font-size: var(--text-hero);
+  letter-spacing: -0.025em;
+}
+
+.intro__lead {
+  max-width: 32ch;
+  margin: var(--space-3) 0 var(--space-6);
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+}
+
+.scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-6);
+  margin: 0;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  animation: bob 2.4s var(--ease-out) infinite;
+}
+
+@keyframes bob {
+  50% {
+    transform: translate(-50%, 6px);
+  }
+}
+
+/* Hotspot labels floating in the 3D scene */
+.hotspots {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hotspot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  pointer-events: auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bg) 75%, transparent);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity var(--duration) var(--ease-out);
+}
+
+.hotspot[data-visible='false'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hotspot__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 1.8s ease-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 70%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+/* Content */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.stats__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stats__value {
+  font-size: var(--text-lg);
+  font-weight: 650;
+}
+
+.stats__label {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.skill-groups {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.skill-groups__name {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: 2px var(--space-2);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.timeline {
+  display: grid;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline__title {
+  font-size: var(--text-base);
+}
+
+.timeline__item .muted {
+  margin: var(--space-1) 0 0;
+}
+
+.timeline__points {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.timeline__points li + li {
+  margin-top: var(--space-2);
+}
+
+.footer {
+  position: relative;
+  z-index: 10;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 900px) {
+  .nav__menu-button {
+    display: none;
+  }
+
+  .nav__links {
+    display: flex;
+    flex-basis: auto;
+    flex-direction: row;
+    gap: var(--space-8);
+    padding: 0;
+  }
+
+  /* Panel on the left; the camera frames the object on the right. */
+  .chapter {
+    justify-content: center;
+    align-items: flex-start;
+    padding: var(--space-24) var(--space-8);
+  }
+
+  .panel {
+    width: min(32rem, 42%);
+    padding: var(--space-8);
+  }
+
+  .chapter--intro {
+    justify-content: center;
+    padding-top: 0;
+  }
+
+  .skill-groups {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+}

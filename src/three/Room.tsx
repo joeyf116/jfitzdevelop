@@ -103,6 +103,38 @@ function Workstation({ animate }: { animate: boolean }) {
   )
 }
 
+// Experience: a corkboard on the left wall with each role pinned up as a note.
+const NOTES: { y: number; z: number; color: string; tilt: number }[] = [
+  { y: 0.2, z: -0.3, color: palette.code[0], tilt: 0.08 },
+  { y: 0.18, z: 0.12, color: palette.code[1], tilt: -0.1 },
+  { y: -0.16, z: -0.22, color: palette.code[3], tilt: -0.05 },
+  { y: -0.14, z: 0.24, color: palette.mug, tilt: 0.12 },
+]
+
+function Corkboard() {
+  return (
+    <group position={[-ROOM / 2 + 0.03, 2.65, -2.2]} rotation={[0, Math.PI / 2, 0]}>
+      <Box size={[1.25, 0.95, 0.05]} color={palette.trim} />
+      <mesh position={[0, 0, 0.03]}>
+        <planeGeometry args={[1.12, 0.82]} />
+        <meshStandardMaterial color={palette.cork} roughness={1} />
+      </mesh>
+      {NOTES.map((note, i) => (
+        <group key={i} position={[note.z, note.y, 0.035 + i * 0.002]} rotation={[0, 0, note.tilt]}>
+          <mesh>
+            <planeGeometry args={[0.3, 0.26]} />
+            <meshStandardMaterial color={note.color} roughness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.1, 0.02]}>
+            <sphereGeometry args={[0.025, 10, 10]} />
+            <meshStandardMaterial color="#d84f4f" />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+}
+
 // Contact: a phone and a notebook under the lamp.
 function Phone() {
   return (
@@ -194,6 +226,9 @@ export function Room({ animate }: { animate: boolean }) {
         <Shelf />
       </Interactive>
       <Interactive chapter="experience" animate={animate}>
+        <Corkboard />
+      </Interactive>
+      <Interactive chapter="projects" animate={animate}>
         <Workstation animate={animate} />
       </Interactive>
       <Interactive chapter="contact" animate={animate}>

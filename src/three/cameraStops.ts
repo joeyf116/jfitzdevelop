@@ -44,10 +44,18 @@ const closeUps: Record<Exclude<ChapterId, 'intro'>, CameraStop> = {
     offset: { landscape: [0.2, 0], portrait: [0, 0.16] },
   },
   experience: {
-    position: new Vector3(0.3, 2.8, 0.1),
-    target: new Vector3(0.1, 2.4, -2.5),
-    width: 2.5,
+    // The corkboard on the left wall.
+    position: new Vector3(0.75, 2.9, -2),
+    target: new Vector3(-2.95, 2.6, -2.2),
+    width: 1.9,
     offset: { landscape: [0.2, 0], portrait: [0, 0.16] },
+  },
+  projects: {
+    // Onto the monitor from slightly above, so the chair and lamp stay out of the shot.
+    position: new Vector3(0.5, 3.3, -0.5),
+    target: new Vector3(0.2, 2.4, -2.5),
+    width: 2,
+    offset: { landscape: [0.22, 0], portrait: [0, 0.18] },
   },
   contact: {
     position: new Vector3(-0.3, 2.85, -0.2),
@@ -57,7 +65,7 @@ const closeUps: Record<Exclude<ChapterId, 'intro'>, CameraStop> = {
   },
 }
 
-const order: ChapterId[] = ['intro', 'about', 'skills', 'experience', 'contact']
+const order: ChapterId[] = ['intro', 'about', 'skills', 'experience', 'projects', 'contact']
 
 /**
  * Camera stop for a chapter, pulled back on narrow screens so the subject still fits.

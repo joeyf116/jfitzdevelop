@@ -18,4 +18,5 @@ export const palette = {
   books: ['#8ea8ff', '#6fd6c0', '#d08b73', '#c3cad8', '#e2c37a'],
   chair: '#3a4254',
   mug: '#e7e9ee',
+  cork: '#8a6a4a',
 } as const

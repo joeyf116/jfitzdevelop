@@ -15,6 +15,17 @@ export const hotspots: { chapter: ChapterId; label: string; position: [number, n
 // Label elements live in the DOM (outside the canvas); the scene positions them each frame.
 export const labelElements = new Map<ChapterId, HTMLElement>()
 
+// Where Goose should look while something in the room is hovered (world space), or null.
+let gaze: [number, number, number] | null = null
+
+export function setGaze(target: [number, number, number] | null) {
+  gaze = target
+}
+
+export function getGaze() {
+  return gaze
+}
+
 let hovered: ChapterId | null = null
 const listeners = new Set<() => void>()
 

@@ -5,13 +5,15 @@ import type { Group, PointLight } from 'three'
 import type { ChapterId } from '../data/resume'
 import { goToChapter, useActiveChapter } from '../scroll/scrollStore'
 import { palette } from '../theme/palette'
-import { setHovered as setHoveredLabel } from './hotspots'
+import { setGaze, setHovered as setHoveredLabel } from './hotspots'
 
 interface InteractiveProps {
   chapter: ChapterId
   animate: boolean
   /** Where the soft glow light sits, relative to the group. */
   glow: [number, number, number]
+  /** Whether Goose looks at this object while it's hovered. */
+  gazeAtMe?: boolean
   /** Children can be a function to react to hover (Goose wags harder). */
   children: ReactNode | ((hovered: boolean) => ReactNode)
 }
@@ -20,7 +22,7 @@ interface InteractiveProps {
  * Wraps a scene object that opens a chapter. On the overview it glows with a slow pulse
  * so visitors can see what's clickable; on hover it lifts and glows brighter.
  */
-export function Interactive({ chapter, animate, glow, children }: InteractiveProps) {
+export function Interactive({ chapter, animate, glow, gazeAtMe = true, children }: InteractiveProps) {
   const group = useRef<Group>(null)
   const light = useRef<PointLight>(null)
   const [hovered, setHovered] = useState(false)
@@ -31,6 +33,13 @@ export function Interactive({ chapter, animate, glow, children }: InteractivePro
   useEffect(() => {
     setHoveredLabel(hovered ? chapter : null)
   }, [hovered, chapter])
+
+  // Goose turns to look at whatever you're pointing at (but not at himself).
+  useEffect(() => {
+    if (!gazeAtMe || !hovered) return
+    setGaze(glow)
+    return () => setGaze(null)
+  }, [hovered, gazeAtMe, glow])
 
   // In on-demand mode, redraw when the glow should change.
   useEffect(() => invalidate(), [hovered, onIntro, invalidate])

@@ -60,9 +60,9 @@ const closeUps: Record<Exclude<ChapterId, 'intro'>, CameraStop> = {
   hobbies: {
     // Facing the left wall: Goose under the window, the black belt and guitar beside it.
     // Shot from the front of the room so the desk chair stays out of the way.
-    position: new Vector3(0.7, 2.7, 3.2),
-    target: new Vector3(-2.4, 1.7, 0.2),
-    width: 4.2,
+    position: new Vector3(0.9, 2.6, 3.9),
+    target: new Vector3(-2.45, 1.55, 0.75),
+    width: 5,
     offset: { landscape: [0.2, 0], portrait: [0, 0.16] },
   },
   contact: {

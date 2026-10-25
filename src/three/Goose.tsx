@@ -1,7 +1,24 @@
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
-import type { Group } from 'three'
+import { useMemo, useRef } from 'react'
+import { Vector3, type Group } from 'three'
+import { getGaze } from './hotspots'
 import { Cylinder } from './parts'
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+
+// The upper muzzle and the white streak share this center so the streak sits flush on it.
+const MUZZLE: [number, number, number] = [0, -0.02, 0.19]
+
+// Things Goose glances at when nothing is hovered (world space): the window, the desk,
+// the lamp, the amp, the front of the room, and the plant.
+const GLANCES: [number, number, number][] = [
+  [-3, 2.4, -0.6],
+  [0.1, 2.3, -2.5],
+  [-0.6, 2.4, -2.3],
+  [-2.7, 0.9, 2.05],
+  [1.5, 1, 2.5],
+  [2.3, 1, -2.2],
+]
 
 // Goose, a European village dog: lean and long, with a long narrow muzzle and a tucked waist.
 // Glossy black everywhere except: legs fading into dark brindle toward the paws, white toes,
@@ -51,14 +68,68 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
   const tail = useRef<Group>(null)
   const body = useRef<Group>(null)
   const head = useRef<Group>(null)
+  const jaw = useRef<Group>(null)
+  const tongueRef = useRef<Group>(null)
 
-  useFrame(({ clock }) => {
-    if (!animate) return
+  const lookAt = useMemo(() => new Vector3(), [])
+  const idle = useRef({ spot: -1, until: 0 })
+  const mouth = useRef({ open: 0, panting: false, until: 0 })
+
+  useFrame(({ camera, clock, pointer }, delta) => {
     const t = clock.elapsedTime
-    if (tail.current) tail.current.rotation.y = Math.sin(t * (excited ? 14 : 2)) * (excited ? 0.45 : 0.12)
-    if (body.current) body.current.scale.set(1 + Math.sin(t * 2.2) * 0.02, 1 + Math.sin(t * 2.2) * 0.03, 1)
-    if (head.current) {
-      head.current.rotation.set(excited ? -0.15 : 0.05 + Math.sin(t * 0.5) * 0.04, 0.45 + Math.sin(t * 0.35) * 0.2, (excited ? 0.25 : 0) + Math.sin(t * 0.8) * 0.04)
+
+    // Where Goose looks, in order: whatever is hovered, then (while idle) either you,
+    // following the camera as you scroll, or a quick glance at something in the room.
+    const h = head.current
+    if (h?.parent) {
+      const hovered = getGaze()
+      if (hovered) {
+        lookAt.set(...hovered)
+      } else {
+        if (animate && t > idle.current.until) {
+          const glance = Math.random() < 0.45
+          idle.current.spot = glance ? Math.floor(Math.random() * GLANCES.length) : -1
+          idle.current.until = t + (glance ? 1.2 + Math.random() * 1.8 : 2.5 + Math.random() * 3)
+        }
+        const spot = animate ? idle.current.spot : -1
+        if (spot >= 0) lookAt.set(...GLANCES[spot])
+        else lookAt.copy(camera.position)
+      }
+      h.parent.worldToLocal(lookAt)
+      const dx = lookAt.x - h.position.x
+      const dy = lookAt.y - h.position.y
+      const dz = lookAt.z - h.position.z
+      const yaw = clamp(Math.atan2(dx, dz) + pointer.x * 0.35, -1.1, 1.1)
+      const pitch = clamp(-Math.atan2(dy, Math.hypot(dx, dz)) - pointer.y * 0.15, -0.55, 0.3)
+      const tilt = (excited ? 0.25 : 0) + (animate ? Math.sin(t * 0.8) * 0.05 : 0)
+      const ease = animate ? Math.min(1, delta * 3) : 1
+      h.rotation.y += (yaw - h.rotation.y) * ease
+      h.rotation.x += (pitch - h.rotation.x) * ease
+      h.rotation.z += (tilt - h.rotation.z) * ease
+    }
+
+    // Mouth: every few seconds he either relaxes with it closed or opens up for a happy pant.
+    // Hovering him always gets the excited pant.
+    const m = mouth.current
+    if (animate && t > m.until) {
+      m.panting = Math.random() < 0.6
+      m.until = t + (m.panting ? 2 + Math.random() * 3 : 1.5 + Math.random() * 2.5)
+    }
+    const panting = excited || (animate && m.panting)
+    m.open += ((panting ? 1 : 0) - m.open) * (animate ? Math.min(1, delta * 5) : 1)
+    const pant = animate ? Math.sin(t * (excited ? 16 : 12)) : 0
+    if (jaw.current) jaw.current.rotation.x = m.open * (0.32 + pant * 0.07)
+    if (tongueRef.current) {
+      tongueRef.current.rotation.x = m.open * 0.35
+      tongueRef.current.scale.set(1, 1, 0.7 + m.open * (0.45 + pant * 0.06))
+    }
+
+    if (!animate) return
+    if (tail.current) tail.current.rotation.y = Math.sin(t * (excited ? 14 : panting ? 5 : 2)) * (excited ? 0.45 : 0.12)
+    if (body.current) {
+      // panting means quick, shallow breaths; otherwise slow and deep
+      const breath = panting ? Math.sin(t * 12) * 0.012 : Math.sin(t * 2.2) * 0.025
+      body.current.scale.set(1 + breath * 0.7, 1 + breath, 1)
     }
   })
 
@@ -103,29 +174,37 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
           <Cylinder radiusTop={0.03} radiusBottom={0.018} height={0.42} color={coat} position={[-0.17, -0.04, 0.06]} rotation={[Math.PI / 2, 0, -1.1]} segments={6} />
         </group>
 
-        {/* neck and orange collar */}
+        {/* neck, with the orange collar sitting low near the shoulders (well clear of his mouth) */}
         <Part position={[0, 0.33, 0.43]} scale={[0.085, 0.16, 0.09]} rotation={[0.45, 0, 0]} color={coat} />
-        <mesh position={[0, 0.36, 0.46]} rotation={[Math.PI / 2 - 0.45, 0, 0]}>
-          <torusGeometry args={[0.093, 0.024, 6, 16]} />
+        <mesh position={[0, 0.25, 0.4]} rotation={[Math.PI / 2 - 0.55, 0, 0]}>
+          <torusGeometry args={[0.09, 0.02, 6, 18]} />
           <meshStandardMaterial color={collar} roughness={0.5} />
         </mesh>
-        <mesh position={[0, 0.27, 0.54]}>
-          <sphereGeometry args={[0.022, 8, 8]} />
+        <mesh position={[0, 0.19, 0.48]}>
+          <sphereGeometry args={[0.018, 8, 8]} />
           <meshStandardMaterial color="#e2c37a" metalness={0.6} roughness={0.3} />
         </mesh>
 
         {/* head, turned toward the room */}
-        <group ref={head} position={[0, 0.5, 0.55]} rotation={[0.05, 0.45, 0]}>
+        {/* YXZ order: turn (yaw) first, then look up or down, like a real neck. */}
+        <group ref={head} position={[0, 0.5, 0.55]} rotation={[0.05, 0.45, 0, 'YXZ']}>
           <Part position={[0, 0, 0]} scale={[0.11, 0.105, 0.13]} color={coat} />
-          {/* long, narrow muzzle */}
-          <Part position={[0, -0.035, 0.19]} scale={[0.052, 0.052, 0.15]} color={coat} />
-          {/* white streak up the nose, white chin, black nose */}
-          <Part position={[0, 0.032, 0.14]} scale={[0.016, 0.011, 0.14]} rotation={[-0.18, 0, 0]} color={white} detail={0} />
-          <Part position={[0, -0.085, 0.2]} scale={[0.038, 0.02, 0.07]} color={white} detail={0} />
-          <Part position={[0, -0.018, 0.34]} scale={[0.027, 0.024, 0.024]} color="#050506" detail={0} />
-          {/* relaxed open mouth and tongue */}
-          <Part position={[0, -0.07, 0.26]} scale={[0.042, 0.011, 0.055]} color="#2a0f14" detail={0} />
-          <Part position={[0.01, -0.095, 0.27]} scale={[0.028, 0.011, 0.05]} rotation={[0.55, 0, 0.1]} color={tongue} detail={0} />
+          {/* long, narrow upper muzzle and black nose */}
+          <Part position={MUZZLE} scale={[0.05, 0.04, 0.15]} color={coat} detail={2} />
+          {/* white streak: a thin ellipsoid sharing the muzzle's center and shape, a hair taller,
+              so it shows as a flush stripe along the top of the snout instead of a separate piece */}
+          <Part position={MUZZLE} scale={[0.016, 0.0412, 0.151]} color={white} detail={2} />
+          <Part position={[0, -0.012, 0.335]} scale={[0.026, 0.023, 0.022]} color="#050506" detail={0} />
+
+          {/* lower jaw on a hinge, with the white chin, the inside of the mouth, and the tongue */}
+          <group ref={jaw} position={[0, -0.045, 0.08]}>
+            <Part position={[0, -0.01, 0.12]} scale={[0.042, 0.02, 0.12]} color={coat} detail={2} />
+            <Part position={[0, -0.01, 0.12]} scale={[0.03, 0.0212, 0.105]} color={white} detail={2} />
+            <Part position={[0, 0.006, 0.12]} scale={[0.035, 0.008, 0.1]} color="#4a1520" detail={1} />
+            <group ref={tongueRef} position={[0, 0.01, 0.08]}>
+              <Part position={[0, 0, 0.1]} scale={[0.026, 0.008, 0.1]} rotation={[0.12, 0, 0]} color={tongue} detail={1} />
+            </group>
+          </group>
           {/* tan-brindle cheeks and tan dots over the eyes */}
           <Part position={[-0.065, -0.05, 0.1]} scale={[0.034, 0.03, 0.05]} color={tan} detail={0} />
           <Part position={[0.065, -0.05, 0.1]} scale={[0.034, 0.03, 0.05]} color={tan} detail={0} />

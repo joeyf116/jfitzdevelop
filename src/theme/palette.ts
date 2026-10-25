@@ -19,4 +19,8 @@ export const palette = {
   chair: '#3a4254',
   mug: '#e7e9ee',
   cork: '#8a6a4a',
+  rug: '#3a2e38',
+  rugBorder: '#4b3a45',
+  curtain: '#5b4a5e',
+  curtainFold: '#4a3b4d',
 } as const

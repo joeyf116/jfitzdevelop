@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { prepareMusic } from './audio/musicStore'
 import { ChapterDots } from './components/ChapterDots'
 import { Nav } from './components/Nav'
 import { SceneBackdrop } from './components/SceneBackdrop'
@@ -17,6 +18,7 @@ export default function App() {
   const motion = useMotionEnabled()
 
   useEffect(() => startScrollTracking(motion), [motion])
+  useEffect(prepareMusic, [])
 
   // Escape zooms back out to the whole room.
   useEffect(() => {

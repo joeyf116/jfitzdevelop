@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from 'react'
+import { toggleMusic, useMusicPlaying } from '../audio/musicStore'
 import { chapters, profile, type ChapterId } from '../data/resume'
 import { setMotionEnabled, useMotionEnabled } from '../motion/motionStore'
 import { goToChapter, useActiveChapter } from '../scroll/scrollStore'
@@ -7,6 +8,7 @@ export function Nav() {
   const [open, setOpen] = useState(false)
   const active = useActiveChapter()
   const motion = useMotionEnabled()
+  const music = useMusicPlaying()
 
   // Links keep real hrefs for no-JS and "open in new tab", but fly the camera when clicked.
   const go = (id: ChapterId) => (event: MouseEvent) => {
@@ -22,6 +24,21 @@ export function Nav() {
           {profile.shortName}
         </a>
         <div className="nav__actions">
+          <button
+            type="button"
+            className="motion-toggle music-toggle"
+            aria-pressed={music}
+            aria-label={music ? 'Stop lofi music' : 'Play lofi music'}
+            title={music ? 'Stop the lofi' : 'Play some lofi jazz'}
+            onClick={() => void toggleMusic()}
+          >
+            <span className="music-toggle__bars" data-playing={music} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+            <span className="music-toggle__label">Lofi</span>
+          </button>
           <button
             type="button"
             className="motion-toggle"

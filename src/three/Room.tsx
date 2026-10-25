@@ -5,6 +5,7 @@ import { Guitar } from './Guitar'
 import { Interactive } from './Interactive'
 import { Lamp } from './Lamp'
 import { Monitor } from './Monitor'
+import { Speaker } from './Speaker'
 import { Box, Cylinder } from './parts'
 
 const ROOM = 6
@@ -222,6 +223,10 @@ export function Room({ animate }: { animate: boolean }) {
       <Chair />
       <Plant />
       <Lamp />
+      {/* Click the speaker to play or stop the lofi. */}
+      <group position={[2.45, 0, -1.15]} rotation={[0, 0.55, 0]}>
+        <Speaker animate={animate} />
+      </group>
       <Interactive chapter="about" animate={animate} glow={[1.6, 2.95, -2.4]}>
         <WallFrame />
       </Interactive>
@@ -240,9 +245,9 @@ export function Room({ animate }: { animate: boolean }) {
       {/* Hobbies: the guitar and Goose both open the same chapter. */}
       {/* Hobbies, grouped along the left wall around the window: Goose's bed under it,
           the black belt and the guitar beside it. */}
-      <Interactive chapter="hobbies" animate={animate} glow={[-1.8, 1.5, -0.1]}>
+      <Interactive chapter="hobbies" animate={animate} glow={[-1.7, 1.1, 0]}>
         {(hovered) => (
-          <group position={[-2, 0, -0.4]} rotation={[0, 0.15, 0]}>
+          <group position={[-2, 0, -0.4]} rotation={[0, -0.5, 0]}>
             <Goose animate={animate} excited={hovered} />
           </group>
         )}

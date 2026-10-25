@@ -10,7 +10,7 @@ interface SectionProps {
 export function Section({ id, title, eyebrow, children }: SectionProps) {
   return (
     <section id={id} className="section" aria-labelledby={`${id}-title`}>
-      {eyebrow && <p className="section__eyebrow">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <h2 id={`${id}-title`} className="section__title">
         {title}
       </h2>

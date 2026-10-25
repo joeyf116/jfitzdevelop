@@ -1,0 +1,21 @@
+// Colors for the WebGL scene, which can't read CSS variables. Keep in sync with tokens.css.
+export const palette = {
+  background: '#0d1016',
+  floor: '#232936',
+  wall: '#1e2430',
+  trim: '#2c3443',
+  desk: '#3a3330',
+  deskLeg: '#1f242e',
+  metal: '#5b6372',
+  monitor: '#0f1218',
+  screen: '#10182b',
+  code: ['#8ea8ff', '#6fd6c0', '#c3cad8', '#f0b67f'],
+  accent: '#8ea8ff',
+  lampLight: '#ffd9a0',
+  windowGlow: '#2b4278',
+  plant: '#5f8f6c',
+  pot: '#c9c2b8',
+  books: ['#8ea8ff', '#6fd6c0', '#d08b73', '#c3cad8', '#e2c37a'],
+  chair: '#3a4254',
+  mug: '#e7e9ee',
+} as const

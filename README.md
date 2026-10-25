@@ -16,11 +16,11 @@ npm run build    # outputs to dist/
 ## Structure
 
 - `src/data/resume.ts`: all site content. Edit text here, not in components.
-- `src/theme/`: design tokens (`tokens.css`), `ThemeProvider` and `useTheme` for the light/dark theme, and the colors the 3D scene uses (`themes.ts`).
+- `src/theme/`: design tokens (`tokens.css`) that every component reads, and the matching colors for the 3D scene (`palette.ts`). The site is dark only.
 - `src/sections/`: one component per page section.
-- `src/three/`: the 3D hero scene, lazy-loaded so text renders before three.js downloads.
+- `src/three/`: the interactive desk/room hero scene, built from primitives (no model files) and lazy-loaded so text renders before three.js downloads. The monitor types code, the room tilts toward the pointer, and the lamp toggles on click or tap.
 
-The scene respects `prefers-reduced-motion` and falls back to a gradient when WebGL is unavailable.
+With `prefers-reduced-motion`, the scene renders still and only redraws on change. Without WebGL it falls back to a soft gradient.
 
 ## Deploy
 

@@ -9,6 +9,7 @@ import { About } from './sections/About'
 import { Contact } from './sections/Contact'
 import { Experience } from './sections/Experience'
 import { Intro } from './sections/Intro'
+import { Projects } from './sections/Projects'
 import { Skills } from './sections/Skills'
 
 export default function App() {
@@ -38,10 +39,11 @@ export default function App() {
         <About />
         <Skills />
         <Experience />
+        <Projects />
         <Contact />
       </main>
       <footer className="footer">
-        © {new Date().getFullYear()} {profile.name}
+        Â© {new Date().getFullYear()} {profile.name}
       </footer>
     </>
   )

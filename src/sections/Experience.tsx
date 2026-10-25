@@ -3,7 +3,7 @@ import { experience } from '../data/resume'
 
 export function Experience() {
   return (
-    <Chapter id="experience" eyebrow="Experience" title="What I’ve been building">
+    <Chapter id="experience" eyebrow="Experience" title="Pinned to the board">
       <ol className="timeline">
         {experience.map((role) => (
           <li key={role.title} className="timeline__item">

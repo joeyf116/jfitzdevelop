@@ -12,8 +12,9 @@ interface Pose {
 
 const newPose = (): Pose => ({ position: new Vector3(), target: new Vector3(), offset: new Vector2() })
 
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
+// Gentle acceleration and landing, with no lurch in the middle of a flight.
+function easeInOutSine(t: number) {
+  return -(Math.cos(Math.PI * t) - 1) / 2
 }
 
 const away = new Vector3()
@@ -83,7 +84,7 @@ export function CameraRig({ animate }: { animate: boolean }) {
       from.offset.copy(cur.offset)
       const stop = resolveStop(requested.index, aspect)
       const distance = from.position.distanceTo(stop.position)
-      flight.current = { index: requested.index, from, start: now, duration: Math.min(2.2, 1.1 + distance * 0.08) }
+      flight.current = { index: requested.index, from, start: now, duration: Math.min(3.2, 1.8 + distance * 0.12) }
     }
     if (!requested) flight.current = null
 
@@ -91,7 +92,7 @@ export function CameraRig({ animate }: { animate: boolean }) {
       const f = flight.current
       const stop = resolveStop(f.index, aspect)
       const raw = Math.min(1, (now - f.start) / f.duration)
-      const e = easeInOutCubic(raw)
+      const e = easeInOutSine(raw)
       cur.position.lerpVectors(f.from.position, stop.position, e)
       cur.target.lerpVectors(f.from.target, stop.target, e)
       cur.offset.set(
@@ -100,7 +101,7 @@ export function CameraRig({ animate }: { animate: boolean }) {
       )
       // Pull back a little mid-flight so moves between objects read as a zoom out, then in.
       away.subVectors(cur.position, cur.target).normalize()
-      cur.position.addScaledVector(away, Math.sin(Math.PI * e) * f.from.position.distanceTo(stop.position) * 0.25)
+      cur.position.addScaledVector(away, Math.sin(Math.PI * e) * f.from.position.distanceTo(stop.position) * 0.2)
       if (raw >= 1) {
         flight.current = null
         endFlight()
@@ -114,7 +115,7 @@ export function CameraRig({ animate }: { animate: boolean }) {
       const distance = g.position.distanceTo(g.target)
       g.position.x += state.pointer.x * distance * 0.04
       g.position.y += state.pointer.y * distance * 0.025
-      const ease = 1 - Math.exp(-delta * 3.2)
+      const ease = 1 - Math.exp(-delta * 2.2)
       cur.position.lerp(g.position, ease)
       cur.target.lerp(g.target, ease)
       cur.offset.lerp(g.offset, ease)

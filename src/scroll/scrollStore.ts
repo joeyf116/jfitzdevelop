@@ -70,7 +70,7 @@ export function startScrollTracking(smooth: boolean) {
     frame = requestAnimationFrame(measure)
   }
   if (smooth) {
-    lenis = new Lenis({ autoRaf: true, lerp: 0.085, wheelMultiplier: 0.9 })
+    lenis = new Lenis({ autoRaf: true, lerp: 0.06, wheelMultiplier: 0.85, anchors: true })
     lenis.on('scroll', schedule)
   }
   measure()
@@ -102,7 +102,7 @@ function navOffset() {
 
 function scrollToSection(section: HTMLElement, immediate: boolean) {
   if (lenis) {
-    lenis.scrollTo(section, { offset: -navOffset(), immediate, force: true, duration: 1.4 })
+    lenis.scrollTo(section, { offset: -navOffset(), immediate, force: true, duration: 1.8 })
   } else {
     section.scrollIntoView({ behavior: 'auto', block: 'start' })
   }

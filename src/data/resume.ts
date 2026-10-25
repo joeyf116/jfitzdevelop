@@ -96,6 +96,48 @@ export const experience: Role[] = [
   },
 ]
 
+export type ProjectArt = 'robot' | 'detective' | 'piggy'
+
+export interface Project {
+  title: string
+  tagline: string
+  description: string
+  tags: string[]
+  art: ProjectArt
+  demoUrl?: string
+  sourceUrl?: string
+  /** Placeholder project shown until real ones are added. */
+  mock?: boolean
+}
+
+// Mock projects for now. Replace with real ones (and add demoUrl/sourceUrl) when ready.
+export const projects: Project[] = [
+  {
+    title: 'Prompt Pal',
+    tagline: 'One prompt, every model',
+    description: 'Send the same prompt to OpenAI, Anthropic, Gemini, and Grok side by side, then compare answers, speed, and cost.',
+    tags: ['React', 'TypeScript', 'LLMs'],
+    art: 'robot',
+    mock: true,
+  },
+  {
+    title: 'Drift Detective',
+    tagline: 'Sniffs out config drift',
+    description: 'A CLI that compares servers against their security baseline and opens a fix-it pull request when something wanders off.',
+    tags: ['Python', 'Ansible', 'CLI'],
+    art: 'detective',
+    mock: true,
+  },
+  {
+    title: 'Token Piggy',
+    tagline: 'Know what your AI costs',
+    description: 'A tiny dashboard that tracks LLM spend per team and nudges you before the budget runs dry.',
+    tags: ['Next.js', 'PostgreSQL', 'FinOps'],
+    art: 'piggy',
+    mock: true,
+  },
+]
+
 export const education = {
   school: 'DigitalCrafts, Atlanta, GA',
   credential: 'Certificate in Software Engineering',
@@ -108,6 +150,7 @@ export const chapters = [
   { id: 'about', label: 'About' },
   { id: 'skills', label: 'Skills' },
   { id: 'experience', label: 'Experience' },
+  { id: 'projects', label: 'Projects' },
   { id: 'contact', label: 'Contact' },
 ] as const
 

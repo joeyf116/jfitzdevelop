@@ -333,7 +333,7 @@ main {
 
 .panel,
 .intro {
-  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
 }
 
 /* Chapters you're not on recede, so the one in focus feels revealed. */
@@ -605,4 +605,134 @@ main {
 [data-motion='off'] *::after {
   transition: none !important;
   animation: none !important;
+}
+
+/* Projects: a hand-drawn, cartoon look for what's on the monitor. */
+.panel[data-variant='cartoon'] {
+  --cartoon-ink: #1b1b2f;
+  --cartoon-paper: #fff7e6;
+}
+
+.panel[data-variant='cartoon'] .panel__title {
+  font-family: 'Luckiest Guy', var(--font-sans);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--cartoon-paper);
+  text-shadow: 3px 3px 0 var(--color-accent);
+}
+
+.projects {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-3);
+  background: var(--cartoon-paper);
+  color: var(--cartoon-ink);
+  border: 3px solid var(--cartoon-ink);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--color-accent);
+  font-family: 'Patrick Hand', var(--font-sans);
+  transition: transform var(--duration) var(--ease-out), box-shadow var(--duration) var(--ease-out);
+}
+
+.project:nth-child(even) {
+  transform: rotate(0.6deg);
+}
+
+.project:nth-child(odd) {
+  transform: rotate(-0.6deg);
+}
+
+.project:hover {
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: 6px 7px 0 var(--color-accent);
+}
+
+.project__art {
+  flex: none;
+  width: 84px;
+  height: 84px;
+  border: 3px solid var(--cartoon-ink);
+  border-radius: 14px;
+  background: var(--cartoon-paper);
+}
+
+.project__body {
+  min-width: 0;
+}
+
+.project__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: 'Luckiest Guy', var(--font-sans);
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.project__badge {
+  padding: 0 var(--space-2);
+  border: 2px solid var(--cartoon-ink);
+  border-radius: 999px;
+  background: #e2c37a;
+  font-family: 'Patrick Hand', var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+}
+
+.project__tagline {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #3b5bdb;
+}
+
+.project__description {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.project__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project__tags li {
+  padding: 0 var(--space-2);
+  border: 2px solid var(--cartoon-ink);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.project__links {
+  display: flex;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+}
+
+.project__links a {
+  font-weight: 700;
+  color: var(--cartoon-ink);
+}
+
+@media (min-width: 900px) {
+  .project__art {
+    width: 104px;
+    height: 104px;
+  }
 }

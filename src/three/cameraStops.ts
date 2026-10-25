@@ -57,6 +57,14 @@ const closeUps: Record<Exclude<ChapterId, 'intro'>, CameraStop> = {
     width: 2,
     offset: { landscape: [0.22, 0], portrait: [0, 0.18] },
   },
+  hobbies: {
+    // Facing the left wall: Goose under the window, the black belt and guitar beside it.
+    // Shot from the front of the room so the desk chair stays out of the way.
+    position: new Vector3(0.9, 2.6, 3.9),
+    target: new Vector3(-2.45, 1.55, 0.75),
+    width: 5,
+    offset: { landscape: [0.2, 0], portrait: [0, 0.16] },
+  },
   contact: {
     position: new Vector3(-0.3, 2.85, -0.2),
     target: new Vector3(-0.75, 1.6, -2),
@@ -65,7 +73,7 @@ const closeUps: Record<Exclude<ChapterId, 'intro'>, CameraStop> = {
   },
 }
 
-const order: ChapterId[] = ['intro', 'about', 'skills', 'experience', 'projects', 'contact']
+const order: ChapterId[] = ['intro', 'about', 'skills', 'experience', 'projects', 'hobbies', 'contact']
 
 /**
  * Camera stop for a chapter, pulled back on narrow screens so the subject still fits.

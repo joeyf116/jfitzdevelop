@@ -23,7 +23,7 @@ export function Chapter({ id, title, eyebrow, variant = 'default', children }: C
         </h2>
         {children}
         <button type="button" className="back-link" onClick={() => goToChapter('intro')}>
-          <span aria-hidden="true">â†</span> Back to the room
+          <span aria-hidden="true">&larr;</span> Back to the room
         </button>
       </div>
     </section>

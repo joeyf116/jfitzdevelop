@@ -1,12 +1,21 @@
+import { useFrame } from '@react-three/fiber'
+import { useEffect, useMemo } from 'react'
+import { MeshStandardMaterial } from 'three'
 import { palette } from '../theme/palette'
+import { BlackBelt } from './BlackBelt'
+import { Goose } from './Goose'
+import { Guitar } from './Guitar'
 import { Interactive } from './Interactive'
 import { Lamp } from './Lamp'
 import { Monitor } from './Monitor'
+import { Speaker } from './Speaker'
 import { Box, Cylinder } from './parts'
 
 const ROOM = 6
 const WALL_H = 4.2
 const DESK_Y = 1.5
+// Where Goose looks when the amp stack is hovered.
+const SPEAKER_GAZE: [number, number, number] = [-2.7, 0.9, 2.05]
 
 function Shell() {
   return (
@@ -22,11 +31,75 @@ function Shell() {
       {/* baseboards */}
       <Box size={[ROOM, 0.14, 0.04]} color={palette.trim} position={[0, 0.07, -ROOM / 2 + 0.02]} />
       <Box size={[0.04, 0.14, ROOM]} color={palette.trim} position={[-ROOM / 2 + 0.02, 0.07, 0]} />
-      {/* rug */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.2, 0.005, -0.9]} receiveShadow>
-        <circleGeometry args={[1.5, 48]} />
-        <meshStandardMaterial color={palette.trim} roughness={1} />
+      {/* one big warm rug ties the desk and Goose's corner together */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-0.55, 0.004, -0.75]} receiveShadow>
+        <planeGeometry args={[3.9, 2.7]} />
+        <meshStandardMaterial color={palette.rugBorder} roughness={1} />
       </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-0.55, 0.006, -0.75]} receiveShadow>
+        <planeGeometry args={[3.6, 2.4]} />
+        <meshStandardMaterial color={palette.rug} roughness={1} />
+      </mesh>
+    </group>
+  )
+}
+
+// Soft curtains framing the window, on a slim rod.
+function Curtains() {
+  return (
+    <group position={[-ROOM / 2 + 0.09, 0, -0.4]}>
+      <Box size={[0.03, 0.03, 2.5]} color={palette.metal} position={[0, 3.5, 0]} metalness={0.5} />
+      {[-1, 1].map((side) => (
+        <group key={side} position={[0, 2.45, side * 1.08]}>
+          {[-0.08, 0, 0.08].map((dz, i) => (
+            <Box key={dz} size={[0.05, 2.1, 0.1]} color={i === 1 ? palette.curtain : palette.curtainFold} position={[i === 1 ? 0.02 : 0, 0, dz]} roughness={1} />
+          ))}
+        </group>
+      ))}
+    </group>
+  )
+}
+
+const BULB_SPACING = 0.32
+
+/** Warm fairy lights draped along the tops of the back and left walls. */
+function StringLights({ animate }: { animate: boolean }) {
+  const materials = useMemo(
+    () => [0, 1, 2].map(() => new MeshStandardMaterial({ color: palette.lampLight, emissive: palette.lampLight, emissiveIntensity: 1.6, toneMapped: false })),
+    [],
+  )
+  useEffect(() => () => materials.forEach((material) => material.dispose()), [materials])
+
+  // A slow, gentle twinkle: three groups of bulbs breathe out of phase.
+  useFrame(({ clock }) => {
+    if (!animate) return
+    materials.forEach((material, i) => {
+      material.emissiveIntensity = 1.3 + Math.sin(clock.elapsedTime * 1.3 + i * 2.1) * 0.5
+    })
+  })
+
+  const bulbs = useMemo(() => {
+    const out: [number, number, number][] = []
+    const span = ROOM - 0.3
+    const count = Math.floor(span / BULB_SPACING)
+    for (let i = 0; i <= count; i++) {
+      const t = i / count
+      const sag = Math.sin(t * Math.PI * 3) ** 2 * 0.14 // three gentle swoops per wall
+      out.push([-span / 2 + t * span, 3.95 - sag, -ROOM / 2 + 0.06])
+      out.push([-ROOM / 2 + 0.06, 3.95 - sag, -span / 2 + t * span])
+    }
+    return out
+  }, [])
+
+  return (
+    <group>
+      {bulbs.map((position, i) => (
+        <mesh key={i} position={position} material={materials[i % 3]}>
+          <sphereGeometry args={[0.03, 8, 8]} />
+        </mesh>
+      ))}
+      <pointLight position={[0, 3.6, -2.4]} color={palette.lampLight} intensity={1.2} distance={4} decay={2} />
+      <pointLight position={[-2.4, 3.6, 0]} color={palette.lampLight} intensity={1.2} distance={4} decay={2} />
     </group>
   )
 }
@@ -219,20 +292,46 @@ export function Room({ animate }: { animate: boolean }) {
       <Chair />
       <Plant />
       <Lamp />
-      <Interactive chapter="about" animate={animate}>
+      <Curtains />
+      <StringLights animate={animate} />
+      {/* Click the amp stack (left of the guitar) to play or stop the lofi. */}
+      <group position={[-ROOM / 2 + 0.26, 0, 2.05]} rotation={[0, Math.PI / 2, 0]}>
+        <Speaker animate={animate} gaze={SPEAKER_GAZE} />
+      </group>
+      <Interactive chapter="about" animate={animate} glow={[1.6, 2.95, -2.4]}>
         <WallFrame />
       </Interactive>
-      <Interactive chapter="skills" animate={animate}>
+      <Interactive chapter="skills" animate={animate} glow={[-1.4, 3.5, -2.3]}>
         <Shelf />
       </Interactive>
-      <Interactive chapter="experience" animate={animate}>
+      <Interactive chapter="experience" animate={animate} glow={[-2.4, 2.65, -2.2]}>
         <Corkboard />
       </Interactive>
-      <Interactive chapter="projects" animate={animate}>
+      <Interactive chapter="projects" animate={animate} glow={[0.1, 2.4, -1.9]}>
         <Workstation animate={animate} />
       </Interactive>
-      <Interactive chapter="contact" animate={animate}>
+      <Interactive chapter="contact" animate={animate} glow={[-0.8, 1.95, -1.75]}>
         <Phone />
+      </Interactive>
+      {/* Hobbies: the guitar and Goose both open the same chapter. */}
+      {/* Hobbies, grouped along the left wall around the window: Goose's bed under it,
+          the black belt and the guitar beside it. */}
+      <Interactive chapter="hobbies" animate={animate} glow={[-1.7, 1.1, 0]} gazeAtMe={false}>
+        {(hovered) => (
+          <group position={[-2, 0, -0.4]} rotation={[0, -0.5, 0]}>
+            <Goose animate={animate} excited={hovered} />
+          </group>
+        )}
+      </Interactive>
+      <Interactive chapter="hobbies" animate={animate} glow={[-2.4, 3, 1.05]}>
+        <group position={[-ROOM / 2, 3.6, 1.05]} rotation={[0, Math.PI / 2, 0]}>
+          <BlackBelt />
+        </group>
+      </Interactive>
+      <Interactive chapter="hobbies" animate={animate} glow={[-2, 1.4, 1.1]}>
+        <group position={[-2.45, 0, 1.1]} rotation={[0, Math.PI / 2 - 0.35, 0]}>
+          <Guitar />
+        </group>
       </Interactive>
     </group>
   )

@@ -138,6 +138,25 @@ export const projects: Project[] = [
   },
 ]
 
+// Off-the-clock things in the room. Edit the copy freely; the 3D objects don't depend on it.
+export const hobbies = [
+  {
+    name: 'Guitar',
+    emoji: '🎸',
+    description: 'Twenty-ish years of playing and I still can’t walk past a guitar without picking it up. The Taylor 214ce by the window is my favorite way to dodge a bug I don’t want to fix yet.',
+  },
+  {
+    name: 'Brazilian Jiu-Jitsu',
+    emoji: '🥋',
+    description: '10th Planet black belt, which mostly means I’m very good at politely asking people to tap. Still the best stress relief I’ve found, even if it involves a lot of getting squished.',
+  },
+  {
+    name: 'Goose',
+    emoji: '🐕',
+    description: 'A European village dog I adopted while stationed in Italy. Chief Napping Officer, professional bed hog, and the real boss of this room.',
+  },
+]
+
 export const education = {
   school: 'DigitalCrafts, Atlanta, GA',
   credential: 'Certificate in Software Engineering',
@@ -151,6 +170,7 @@ export const chapters = [
   { id: 'skills', label: 'Skills' },
   { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
+  { id: 'hobbies', label: 'Hobbies' },
   { id: 'contact', label: 'Contact' },
 ] as const
 

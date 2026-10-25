@@ -18,6 +18,7 @@ function easeInOutSine(t: number) {
 }
 
 const away = new Vector3()
+const UP = new Vector3(0, 1, 0)
 
 /**
  * Moves the camera between chapter stops.
@@ -111,6 +112,12 @@ export function CameraRig({ animate }: { animate: boolean }) {
       cur.target.copy(g.target)
       cur.offset.copy(g.offset)
     } else {
+      // On the overview, slowly sway around the room so it reads as 3D before anyone touches it.
+      const sway = Math.max(0, 1 - progress * 2)
+      if (sway > 0) {
+        away.subVectors(g.position, g.target).applyAxisAngle(UP, Math.sin(now * 0.2) * 0.12 * sway)
+        g.position.copy(g.target).add(away)
+      }
       // Pointer drift, scaled by distance so close-ups don't swing wildly.
       const distance = g.position.distanceTo(g.target)
       g.position.x += state.pointer.x * distance * 0.04

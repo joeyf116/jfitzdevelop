@@ -44,7 +44,7 @@ const closeUps: Record<Exclude<ChapterId, 'intro'>, CameraStop> = {
     offset: { landscape: [0.2, 0], portrait: [0, 0.16] },
   },
   experience: {
-    position: new Vector3(0.3, 2.55, 0.1),
+    position: new Vector3(0.3, 2.8, 0.1),
     target: new Vector3(0.1, 2.4, -2.5),
     width: 2.5,
     offset: { landscape: [0.2, 0], portrait: [0, 0.16] },

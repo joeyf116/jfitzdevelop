@@ -23,7 +23,9 @@ npm run build    # outputs to dist/
   - `cameraStops.ts`: where the camera sits for each chapter, adjusted to fit any screen shape.
   - `Interactive.tsx` / `hotspots.ts`: objects that open a chapter when clicked (wall frame → About, bookshelf → Skills, monitor → Experience, phone → Contact).
 
-The room stays fixed behind the page. Scrolling or clicking an object flies the camera to it while that chapter's panel slides over. Every chapter is also reachable from the nav and by keyboard. With `prefers-reduced-motion`, the camera cuts between stops and the scene only redraws on change. Without WebGL the chapters read on a soft gradient.
+The room stays fixed behind the page. Scrolling (smoothed with [Lenis](https://github.com/darkroomengineering/lenis)) eases the camera between stops. Clicking an object, a nav link, or a chapter dot flies the camera to it along an arc before the chapter's panel fades in, and Escape or "Back to the room" flies back out. Every chapter is also reachable by keyboard.
+
+Motion follows the OS "reduce motion" setting by default, and the **Motion on/off** button in the nav overrides it (saved in `localStorage`, see `src/motion/motionStore.ts`). With motion off, the camera cuts between stops and the scene only redraws on change. Without WebGL the chapters read on a soft gradient.
 
 ## Deploy
 

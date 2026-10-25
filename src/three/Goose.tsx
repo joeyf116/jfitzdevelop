@@ -1,13 +1,195 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
-import { Vector3, type Group } from 'three'
+import {
+  BufferAttribute,
+  CapsuleGeometry,
+  CatmullRomCurve3,
+  Color,
+  ConeGeometry,
+  LatheGeometry,
+  SphereGeometry,
+  TubeGeometry,
+  Vector2,
+  Vector3,
+  type BufferGeometry,
+  type Group,
+} from 'three'
 import { getGaze } from './hotspots'
-import { Cylinder } from './parts'
+
+// Goose, a European village dog, drawn in a soft, cozy low-poly style: long and lean, a big
+// friendly head, a long tapered snout, and big warm eyes. Markings are painted onto each mesh
+// as vertex colors (not stuck-on pieces): glossy black coat, legs fading into brindle, tan
+// eyebrow dots and cheeks, a white streak up the nose, white chin, bib, and toes.
+
+const COAT = new Color('#1c1c22')
+const BRINDLE = new Color('#5a3a22')
+const TAN = new Color('#b9824c')
+const WHITE = new Color('#f4f1ea')
+const tongueColor = '#ef8fa0'
+const mouthColor = '#5a1f2b'
+const collarColor = '#e0812a'
+const bedColor = '#3a4254'
+const bedRim = '#4a5368'
+const cushion = '#56607a'
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
+const smooth = (edge0: number, edge1: number, x: number) => {
+  const t = clamp((x - edge0) / (edge1 - edge0), 0, 1)
+  return t * t * (3 - 2 * t)
+}
 
-// The upper muzzle and the white streak share this center so the streak sits flush on it.
-const MUZZLE: [number, number, number] = [0, -0.02, 0.19]
+/** Paints a geometry with vertex colors from a function of each vertex's local position. */
+function paint(geometry: BufferGeometry, painter: (p: Vector3, out: Color) => void) {
+  const position = geometry.attributes.position
+  const colors = new Float32Array(position.count * 3)
+  const p = new Vector3()
+  const c = new Color()
+  for (let i = 0; i < position.count; i++) {
+    p.fromBufferAttribute(position, i)
+    c.copy(COAT)
+    painter(p, c)
+    colors[i * 3] = c.r
+    colors[i * 3 + 1] = c.g
+    colors[i * 3 + 2] = c.b
+  }
+  geometry.setAttribute('color', new BufferAttribute(colors, 3))
+  return geometry
+}
+
+/** A spot of color with a soft edge, centered at `center` with radius `r`. */
+const spot = (p: Vector3, center: Vector3, r: number) => 1 - smooth(r * 0.6, r, p.distanceTo(center))
+
+/** A tapered snout shape (revolved profile) pointing along +z, flattened a little. */
+function snoutGeometry(profile: [number, number][], flatten: number) {
+  const geometry = new LatheGeometry(
+    profile.map(([r, y]) => new Vector2(r, y)),
+    28,
+  )
+  geometry.rotateX(Math.PI / 2)
+  geometry.scale(1, flatten, 1)
+  return geometry
+}
+
+/** Black near the body, fading into brindle stripes toward a white-toed paw at +z. */
+function legGeometry(radius: number, length: number) {
+  const geometry = new CapsuleGeometry(radius, length, 6, 14)
+  geometry.rotateX(Math.PI / 2)
+  const half = length / 2 + radius
+  return paint(geometry, (p, c) => {
+    const t = (p.z + half) / (half * 2) // 0 at the body, 1 at the paw
+    const stripe = Math.sin(p.z * 95 + Math.sin(p.x * 60) * 1.5) > 0.15 ? 1 : 0
+    c.lerp(BRINDLE, stripe * smooth(0.35, 0.75, t) * 0.85)
+    c.lerp(WHITE, smooth(0.9, 0.96, t))
+  })
+}
+
+function useGooseGeometry() {
+  return useMemo(() => {
+    // Head: a soft sphere (unit radius, scaled on the mesh) with tan brows, tan cheeks, and the
+    // top of the white streak running up from the nose.
+    const head = paint(new SphereGeometry(1, 48, 36), (p, c) => {
+      const streak = smooth(0.13, 0.06, Math.abs(p.x)) * smooth(0.55, 0.8, p.z) * smooth(-0.05, 0.2, p.y) * smooth(0.85, 0.6, p.y)
+      c.lerp(TAN, spot(p, new Vector3(0.6, -0.5, 0.6), 0.3) + spot(p, new Vector3(-0.6, -0.5, 0.6), 0.3))
+      c.lerp(TAN, spot(p, new Vector3(0.36, 0.52, 0.76), 0.17) + spot(p, new Vector3(-0.36, 0.52, 0.76), 0.17))
+      c.lerp(WHITE, streak)
+    })
+
+    // Upper snout: long and tapered, white stripe along the top blending into the black.
+    const snout = paint(
+      snoutGeometry(
+        [
+          [0, 0],
+          [0.07, 0],
+          [0.069, 0.05],
+          [0.063, 0.11],
+          [0.052, 0.17],
+          [0.04, 0.21],
+          [0.024, 0.232],
+          [0, 0.24],
+        ],
+        0.78,
+      ),
+      (p, c) => {
+        const angle = Math.abs(Math.atan2(p.x, p.y)) // 0 on top
+        c.lerp(WHITE, smooth(0.42, 0.22, angle) * smooth(0.0, 0.05, p.z))
+      },
+    )
+
+    // Lower jaw with a white chin; hinges open for panting.
+    const jaw = paint(
+      snoutGeometry(
+        [
+          [0, 0],
+          [0.052, 0],
+          [0.049, 0.07],
+          [0.041, 0.13],
+          [0.029, 0.165],
+          [0, 0.175],
+        ],
+        0.5,
+      ),
+      (p, c) => {
+        const angle = Math.abs(Math.atan2(p.x, -p.y)) // 0 underneath
+        c.lerp(WHITE, smooth(1.3, 0.8, angle) * smooth(0.02, 0.08, p.z))
+      },
+    )
+
+    // Body: one long lean capsule along z with the white bib on the chest.
+    const body = paint(
+      (() => {
+        const g = new CapsuleGeometry(0.135, 0.62, 8, 24)
+        g.rotateX(Math.PI / 2)
+        return g
+      })(),
+      (p, c) => {
+        c.lerp(WHITE, smooth(0.22, 0.34, p.z) * smooth(0.02, -0.07, p.y) * smooth(0.11, 0.05, Math.abs(p.x)))
+      },
+    )
+
+    // a hint of the bib on the front of the lower neck
+    const neck = paint(new CapsuleGeometry(0.09, 0.12, 6, 18), (p, c) => {
+      c.lerp(WHITE, smooth(0.03, 0.07, p.z) * smooth(-0.04, -0.1, p.y) * 0.8)
+    })
+
+    // Semi-folded ears: a soft cone whose top half bends forward.
+    const ear = new ConeGeometry(0.072, 0.17, 18, 10)
+    const pos = ear.attributes.position
+    const v = new Vector3()
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i)
+      if (v.y > 0) {
+        const bend = (v.y / 0.075) * 1.9
+        const y = v.y
+        v.y = Math.cos(bend) * y * 0.7 + 0.0
+        v.z = v.z + Math.sin(bend) * y * 0.9
+      }
+      pos.setXYZ(i, v.x, v.y, v.z)
+    }
+    ear.scale(1, 1, 0.45)
+    ear.computeVertexNormals()
+
+    const frontLeg = legGeometry(0.036, 0.3)
+    const hindLeg = legGeometry(0.036, 0.24)
+
+    const tail = new TubeGeometry(
+      new CatmullRomCurve3([
+        new Vector3(0, 0.15, -0.45),
+        new Vector3(-0.08, 0.11, -0.58),
+        new Vector3(-0.22, 0.07, -0.56),
+        new Vector3(-0.3, 0.05, -0.4),
+        new Vector3(-0.3, 0.05, -0.25),
+      ]),
+      24,
+      0.022,
+      8,
+    )
+
+    return { head, snout, jaw, body, neck, ear, frontLeg, hindLeg, tail }
+  }, [])
+}
+
+// The upper muzzle sits here inside the head, so it reads as one continuous shape.
+const SNOUT_BASE: [number, number, number] = [0, -0.035, 0.07]
 
 // Things Goose glances at when nothing is hovered (world space): the window, the desk,
 // the lamp, the amp, the front of the room, and the plant.
@@ -20,56 +202,18 @@ const GLANCES: [number, number, number][] = [
   [2.3, 1, -2.2],
 ]
 
-// Goose, a European village dog: lean and long, with a long narrow muzzle and a tucked waist.
-// Glossy black everywhere except: legs fading into dark brindle toward the paws, white toes,
-// a white bib, a white streak up the nose and a white chin, tan dots over the eyes,
-// tan-brindle cheeks, semi-folded ears, and an orange collar.
-const coat = '#121216'
-const brindle = '#4a2f1d'
-const tan = '#a8743f'
-const white = '#f2efe9'
-const tongue = '#e77a8f'
-const collar = '#d9822b'
-const bed = '#3a4254'
-const bedRim = '#4a5368'
-const cushion = '#56607a'
-
-type Vec3 = [number, number, number]
-
-function Part({ position, scale, color, rotation = [0, 0, 0], detail = 1 }: { position: Vec3; scale: Vec3; color: string; rotation?: Vec3; detail?: number }) {
-  return (
-    <mesh position={position} scale={scale} rotation={rotation} castShadow>
-      <icosahedronGeometry args={[1, detail]} />
-      <meshStandardMaterial color={color} flatShading roughness={0.45} />
-    </mesh>
-  )
-}
-
 /**
- * A leg modeled lying flat and pointing forward (+z) from `position`: black near the body,
- * fading into denser brindle stripes toward the white-toed paw.
+ * Goose lying in his bed. He watches whatever you hover, otherwise follows you around the room
+ * and glances about; every so often he opens his mouth for a happy pant. He breathes slowly and
+ * his tail wags, faster when you hover him.
  */
-function Leg({ position, length, rotation = [0, 0, 0] }: { position: Vec3; length: number; rotation?: Vec3 }) {
-  const stripes = [0.55, 0.65, 0.73, 0.8, 0.87].map((t) => t * length)
-  return (
-    <group position={position} rotation={rotation}>
-      <Cylinder radiusTop={0.048} radiusBottom={0.034} height={length} color={coat} position={[0, 0, length / 2]} rotation={[Math.PI / 2, 0, 0]} segments={7} roughness={0.45} />
-      {stripes.map((z, i) => (
-        <Cylinder key={z} radiusTop={0.038} height={i < 2 ? 0.028 : 0.02} color={brindle} position={[0, 0, z]} rotation={[Math.PI / 2, 0, 0]} segments={7} roughness={0.7} />
-      ))}
-      <Part position={[0, -0.01, length + 0.02]} scale={[0.048, 0.03, 0.06]} color={coat} detail={0} />
-      <Part position={[0, -0.012, length + 0.065]} scale={[0.044, 0.026, 0.035]} color={white} detail={0} />
-    </group>
-  )
-}
-
-/** Goose lying in his bed, head up. He breathes, his tail thumps, and he perks up on hover. */
 export function Goose({ animate, excited }: { animate: boolean; excited: boolean }) {
+  const g = useGooseGeometry()
   const tail = useRef<Group>(null)
   const body = useRef<Group>(null)
   const head = useRef<Group>(null)
   const jaw = useRef<Group>(null)
-  const tongueRef = useRef<Group>(null)
+  const tongue = useRef<Group>(null)
 
   const lookAt = useMemo(() => new Vector3(), [])
   const idle = useRef({ spot: -1, until: 0 })
@@ -91,17 +235,18 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
           idle.current.spot = glance ? Math.floor(Math.random() * GLANCES.length) : -1
           idle.current.until = t + (glance ? 1.2 + Math.random() * 1.8 : 2.5 + Math.random() * 3)
         }
-        const spot = animate ? idle.current.spot : -1
-        if (spot >= 0) lookAt.set(...GLANCES[spot])
+        const spotIndex = animate ? idle.current.spot : -1
+        if (spotIndex >= 0) lookAt.set(...GLANCES[spotIndex])
         else lookAt.copy(camera.position)
       }
       h.parent.worldToLocal(lookAt)
       const dx = lookAt.x - h.position.x
       const dy = lookAt.y - h.position.y
       const dz = lookAt.z - h.position.z
-      const yaw = clamp(Math.atan2(dx, dz) + pointer.x * 0.35, -1.1, 1.1)
-      const pitch = clamp(-Math.atan2(dy, Math.hypot(dx, dz)) - pointer.y * 0.15, -0.55, 0.3)
-      const tilt = (excited ? 0.25 : 0) + (animate ? Math.sin(t * 0.8) * 0.05 : 0)
+      const yaw = clamp(Math.atan2(dx, dz) + pointer.x * 0.3, -1.1, 1.1)
+      const pitch = clamp(-Math.atan2(dy, Math.hypot(dx, dz)) - pointer.y * 0.12, -0.5, 0.3)
+      // a curious little head tilt, more when excited
+      const tilt = (excited ? 0.16 : 0.06) + (animate ? Math.sin(t * 0.7) * 0.06 : 0)
       const ease = animate ? Math.min(1, delta * 3) : 1
       h.rotation.y += (yaw - h.rotation.y) * ease
       h.rotation.x += (pitch - h.rotation.x) * ease
@@ -109,7 +254,6 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
     }
 
     // Mouth: every few seconds he either relaxes with it closed or opens up for a happy pant.
-    // Hovering him always gets the excited pant.
     const m = mouth.current
     if (animate && t > m.until) {
       m.panting = Math.random() < 0.6
@@ -117,115 +261,139 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
     }
     const panting = excited || (animate && m.panting)
     m.open += ((panting ? 1 : 0) - m.open) * (animate ? Math.min(1, delta * 5) : 1)
-    const pant = animate ? Math.sin(t * (excited ? 16 : 12)) : 0
-    if (jaw.current) jaw.current.rotation.x = m.open * (0.32 + pant * 0.07)
-    if (tongueRef.current) {
-      tongueRef.current.rotation.x = m.open * 0.35
-      tongueRef.current.scale.set(1, 1, 0.7 + m.open * (0.45 + pant * 0.06))
+    const pant = animate ? Math.sin(t * (excited ? 15 : 11)) : 0
+    if (jaw.current) jaw.current.rotation.x = m.open * (0.3 + pant * 0.06)
+    if (tongue.current) {
+      tongue.current.position.z = 0.07 + m.open * 0.025
+      tongue.current.rotation.x = m.open * (0.35 + pant * 0.05)
     }
 
     if (!animate) return
-    if (tail.current) tail.current.rotation.y = Math.sin(t * (excited ? 14 : panting ? 5 : 2)) * (excited ? 0.45 : 0.12)
+    if (tail.current) tail.current.rotation.y = Math.sin(t * (excited ? 14 : panting ? 5 : 2)) * (excited ? 0.4 : 0.12)
     if (body.current) {
       // panting means quick, shallow breaths; otherwise slow and deep
-      const breath = panting ? Math.sin(t * 12) * 0.012 : Math.sin(t * 2.2) * 0.025
+      const breath = panting ? Math.sin(t * 11) * 0.012 : Math.sin(t * 2.2) * 0.025
       body.current.scale.set(1 + breath * 0.7, 1 + breath, 1)
     }
   })
+
+  const coat = <meshStandardMaterial vertexColors roughness={0.6} />
 
   return (
     <group>
       {/* bed: base, cushion, and a raised rim */}
       <mesh position={[0, 0.06, 0]} receiveShadow>
         <cylinderGeometry args={[0.95, 1, 0.12, 24]} />
-        <meshStandardMaterial color={bed} roughness={1} />
+        <meshStandardMaterial color={bedColor} roughness={1} />
       </mesh>
       <mesh position={[0, 0.13, 0]} receiveShadow>
         <cylinderGeometry args={[0.82, 0.82, 0.04, 24]} />
         <meshStandardMaterial color={cushion} roughness={1} />
       </mesh>
       <mesh position={[0, 0.16, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
-        <torusGeometry args={[0.88, 0.12, 8, 28]} />
+        <torusGeometry args={[0.88, 0.12, 10, 32]} />
         <meshStandardMaterial color={bedRim} roughness={1} />
       </mesh>
 
-      {/* Goose, lying along +z with his head up. Everything sits on the cushion (y ≈ 0.15). */}
+      {/* Goose, lying along +z with his head up, resting on the cushion */}
       <group position={[0, 0.15, -0.05]}>
-        <group ref={body}>
-          {/* deep chest, long waist, hips rolled onto one side */}
-          <Part position={[0, 0.17, 0.22]} scale={[0.15, 0.16, 0.3]} color={coat} />
-          <Part position={[0, 0.15, -0.12]} scale={[0.12, 0.12, 0.32]} color={coat} />
-          <Part position={[0.04, 0.15, -0.44]} scale={[0.16, 0.13, 0.2]} rotation={[0, 0, 0.35]} color={coat} />
-          {/* white bib */}
-          <Part position={[0, 0.12, 0.47]} scale={[0.08, 0.1, 0.05]} rotation={[0.4, 0, 0]} color={white} />
-          {/* folded hind leg: thigh on the side, lower leg tucked forward */}
-          <Part position={[0.15, 0.13, -0.38]} scale={[0.07, 0.11, 0.17]} color={coat} />
+        <group ref={body} position={[0, 0.13, 0]}>
+          <mesh geometry={g.body} castShadow>
+            {coat}
+          </mesh>
         </group>
 
-        {/* front legs stretched out on the cushion */}
-        <Leg position={[-0.085, 0.04, 0.38]} length={0.42} />
-        <Leg position={[0.085, 0.04, 0.38]} length={0.4} rotation={[0, 0.12, 0]} />
-        {/* hind legs: one tucked forward along the side, one peeking out behind */}
-        <Leg position={[0.2, 0.04, -0.5]} length={0.36} rotation={[0, 0.15, 0]} />
-        <Leg position={[-0.12, 0.04, -0.52]} length={0.26} rotation={[0, -2.6, 0]} />
-
-        {/* tail curled around the side of the bed */}
-        <group ref={tail} position={[0, 0.1, -0.6]}>
-          <Cylinder radiusTop={0.03} radiusBottom={0.018} height={0.42} color={coat} position={[-0.17, -0.04, 0.06]} rotation={[Math.PI / 2, 0, -1.1]} segments={6} />
-        </group>
-
-        {/* neck, with the orange collar sitting low near the shoulders (well clear of his mouth) */}
-        <Part position={[0, 0.33, 0.43]} scale={[0.085, 0.16, 0.09]} rotation={[0.45, 0, 0]} color={coat} />
-        <mesh position={[0, 0.25, 0.4]} rotation={[Math.PI / 2 - 0.55, 0, 0]}>
-          <torusGeometry args={[0.09, 0.02, 6, 18]} />
-          <meshStandardMaterial color={collar} roughness={0.5} />
+        {/* front legs stretched out, hind legs tucked along his side */}
+        <mesh geometry={g.frontLeg} position={[-0.075, 0.035, 0.52]} castShadow>
+          {coat}
         </mesh>
-        <mesh position={[0, 0.19, 0.48]}>
-          <sphereGeometry args={[0.018, 8, 8]} />
+        <mesh geometry={g.frontLeg} position={[0.075, 0.035, 0.5]} rotation={[0, 0.1, 0]} castShadow>
+          {coat}
+        </mesh>
+        <mesh position={[0.11, 0.13, -0.3]} scale={[0.09, 0.1, 0.15]} castShadow>
+          <sphereGeometry args={[1, 24, 16]} />
+          <meshStandardMaterial color={COAT} roughness={0.5} />
+        </mesh>
+        <mesh geometry={g.hindLeg} position={[0.17, 0.035, -0.22]} rotation={[0, 0.12, 0]} castShadow>
+          {coat}
+        </mesh>
+
+        {/* tail, curled around his side */}
+        <group ref={tail}>
+          <mesh geometry={g.tail} castShadow>
+            <meshStandardMaterial color={COAT} roughness={0.5} />
+          </mesh>
+        </group>
+
+        {/* neck with a low orange collar and a little tag */}
+        <mesh geometry={g.neck} position={[0, 0.3, 0.4]} rotation={[0.55, 0, 0]} castShadow>
+          {coat}
+        </mesh>
+        <mesh position={[0, 0.257, 0.374]} rotation={[0.55 - Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.094, 0.016, 8, 28]} />
+          <meshStandardMaterial color={collarColor} roughness={0.5} />
+        </mesh>
+        <mesh position={[0, 0.2, 0.45]}>
+          <sphereGeometry args={[0.016, 12, 12]} />
           <meshStandardMaterial color="#e2c37a" metalness={0.6} roughness={0.3} />
         </mesh>
 
-        {/* head, turned toward the room */}
+        {/* head */}
         {/* YXZ order: turn (yaw) first, then look up or down, like a real neck. */}
-        <group ref={head} position={[0, 0.5, 0.55]} rotation={[0.05, 0.45, 0, 'YXZ']}>
-          <Part position={[0, 0, 0]} scale={[0.11, 0.105, 0.13]} color={coat} />
-          {/* long, narrow upper muzzle and black nose */}
-          <Part position={MUZZLE} scale={[0.05, 0.04, 0.15]} color={coat} detail={2} />
-          {/* white streak: a thin ellipsoid sharing the muzzle's center and shape, a hair taller,
-              so it shows as a flush stripe along the top of the snout instead of a separate piece */}
-          <Part position={MUZZLE} scale={[0.016, 0.0412, 0.151]} color={white} detail={2} />
-          <Part position={[0, -0.012, 0.335]} scale={[0.026, 0.023, 0.022]} color="#050506" detail={0} />
+        <group ref={head} position={[0, 0.43, 0.49]} rotation={[0, 0.4, 0.08, 'YXZ']}>
+          <mesh geometry={g.head} scale={[0.135, 0.125, 0.13]} castShadow>
+            {coat}
+          </mesh>
 
-          {/* lower jaw on a hinge, with the white chin, the inside of the mouth, and the tongue */}
-          <group ref={jaw} position={[0, -0.045, 0.08]}>
-            <Part position={[0, -0.01, 0.12]} scale={[0.042, 0.02, 0.12]} color={coat} detail={2} />
-            <Part position={[0, -0.01, 0.12]} scale={[0.03, 0.0212, 0.105]} color={white} detail={2} />
-            <Part position={[0, 0.006, 0.12]} scale={[0.035, 0.008, 0.1]} color="#4a1520" detail={1} />
-            <group ref={tongueRef} position={[0, 0.01, 0.08]}>
-              <Part position={[0, 0, 0.1]} scale={[0.026, 0.008, 0.1]} rotation={[0.12, 0, 0]} color={tongue} detail={1} />
+          {/* one long, tapered snout with a button nose */}
+          <mesh geometry={g.snout} position={SNOUT_BASE} castShadow>
+            {coat}
+          </mesh>
+          <mesh position={[SNOUT_BASE[0], SNOUT_BASE[1] + 0.008, SNOUT_BASE[2] + 0.232]} scale={[1.15, 0.85, 0.8]}>
+            <sphereGeometry args={[0.026, 16, 12]} />
+            <meshStandardMaterial color="#0b0b0e" roughness={0.25} />
+          </mesh>
+
+          {/* lower jaw, mouth, and tongue: hinged at the back so he can pant */}
+          <group ref={jaw} position={[0, -0.065, 0.075]}>
+            <mesh geometry={g.jaw} castShadow>
+              {coat}
+            </mesh>
+            <mesh position={[0, 0.012, 0.09]} scale={[0.04, 0.008, 0.075]}>
+              <sphereGeometry args={[1, 16, 12]} />
+              <meshStandardMaterial color={mouthColor} roughness={0.8} />
+            </mesh>
+            <group ref={tongue} position={[0, 0.016, 0.07]}>
+              <mesh position={[0, 0, 0.06]} scale={[0.025, 0.008, 0.06]}>
+                <sphereGeometry args={[1, 20, 14]} />
+                <meshStandardMaterial color={tongueColor} roughness={0.45} />
+              </mesh>
             </group>
           </group>
-          {/* tan-brindle cheeks and tan dots over the eyes */}
-          <Part position={[-0.065, -0.05, 0.1]} scale={[0.034, 0.03, 0.05]} color={tan} detail={0} />
-          <Part position={[0.065, -0.05, 0.1]} scale={[0.034, 0.03, 0.05]} color={tan} detail={0} />
-          <Part position={[-0.045, 0.068, 0.1]} scale={[0.016, 0.012, 0.012]} color={tan} detail={0} />
-          <Part position={[0.045, 0.068, 0.1]} scale={[0.016, 0.012, 0.012]} color={tan} detail={0} />
-          {/* eyes with a tiny highlight */}
+
+          {/* big, warm, shiny eyes */}
           {[-1, 1].map((side) => (
-            <group key={side} position={[side * 0.045, 0.034, 0.112]}>
-              <Part position={[0, 0, 0]} scale={[0.016, 0.016, 0.01]} color="#2a1a10" detail={0} />
-              <mesh position={[side * 0.004, 0.005, 0.009]}>
-                <sphereGeometry args={[0.004, 6, 6]} />
+            <group key={side} position={[side * 0.056, 0.028, 0.11]}>
+              <mesh>
+                <sphereGeometry args={[0.027, 20, 16]} />
+                <meshStandardMaterial color="#3f2412" roughness={0.15} />
+              </mesh>
+              <mesh position={[0.008, 0.01, 0.022]}>
+                <sphereGeometry args={[0.009, 12, 10]} />
+                <meshBasicMaterial color="#ffffff" />
+              </mesh>
+              <mesh position={[-0.007, -0.008, 0.024]}>
+                <sphereGeometry args={[0.004, 8, 8]} />
                 <meshBasicMaterial color="#ffffff" />
               </mesh>
             </group>
           ))}
-          {/* semi-folded ears: upright base, tips flopping forward */}
+
+          {/* semi-folded ears, tips flopping forward */}
           {[-1, 1].map((side) => (
-            <group key={side} position={[side * 0.075, 0.095, -0.02]} rotation={[0, 0, -side * 0.35]}>
-              <Part position={[0, 0.05, 0]} scale={[0.04, 0.06, 0.018]} color={coat} detail={0} />
-              <Part position={[0, 0.1, 0.03]} scale={[0.035, 0.035, 0.014]} rotation={[1.1, 0, 0]} color={coat} detail={0} />
-            </group>
+            <mesh key={side} geometry={g.ear} position={[side * 0.095, 0.1, -0.02]} rotation={[0.1, side * 0.25, -side * 0.75]} castShadow>
+              <meshStandardMaterial color={COAT} roughness={0.5} />
+            </mesh>
           ))}
         </group>
       </group>

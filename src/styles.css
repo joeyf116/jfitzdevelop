@@ -7,8 +7,8 @@
   box-sizing: border-box;
 }
 
+/* Smooth scrolling comes from Lenis when motion is on, so no CSS scroll-behavior here. */
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: var(--nav-height);
 }
 
@@ -91,6 +91,25 @@ a {
   height: 100lvh;
 }
 
+.backdrop canvas {
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-out);
+}
+
+.backdrop[data-ready='true'] canvas {
+  opacity: 1;
+}
+
+/* Soft vignette that pulls the eye to the middle of the scene. */
+.backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at 55% 50%, transparent 55%, rgb(13 16 22 / 0.65) 100%);
+  pointer-events: none;
+}
+
 .backdrop[data-fallback='true'] {
   background: radial-gradient(circle at 60% 40%, var(--color-accent-soft), transparent 60%);
 }
@@ -171,6 +190,105 @@ a {
   text-decoration: none;
 }
 
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.motion-toggle {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.motion-toggle[aria-pressed='true'] {
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+/* Chapter progress rail */
+/* Desktop only: on phones the right edge belongs to the content panels. */
+.dots {
+  position: fixed;
+  top: 50%;
+  right: var(--space-2);
+  z-index: 15;
+  display: none;
+  flex-direction: column;
+  gap: var(--space-1);
+  transform: translateY(-50%);
+}
+
+.dots__dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dots__dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-text-muted);
+  opacity: 0.5;
+  transition: height var(--duration) var(--ease-out), background-color var(--duration), opacity var(--duration);
+}
+
+.dots__dot[aria-current]::before {
+  height: 18px;
+  background: var(--color-accent);
+  opacity: 1;
+}
+
+.dots__label {
+  position: absolute;
+  right: 100%;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration);
+}
+
+.dots__dot:hover .dots__label,
+.dots__dot:focus-visible .dots__label {
+  opacity: 1;
+}
+
+.back-link {
+  display: inline-flex;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.back-link:hover {
+  color: var(--color-text);
+}
+
 .nav__links {
   display: none;
   flex-basis: 100%;
@@ -198,6 +316,7 @@ a {
 main {
   position: relative;
   z-index: 10;
+  pointer-events: none;
 }
 
 .chapter {
@@ -210,6 +329,18 @@ main {
   /* Leave the top of the screen for the object the camera is looking at. */
   padding: 58svh var(--space-4) var(--space-8);
   pointer-events: none;
+}
+
+.panel,
+.intro {
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+}
+
+/* Chapters you're not on recede, so the one in focus feels revealed. */
+.chapter[data-active='false'] .panel,
+.chapter[data-active='false'] .intro {
+  opacity: 0;
+  transform: translateY(28px);
 }
 
 .panel {
@@ -266,6 +397,11 @@ main {
   white-space: nowrap;
   color: var(--color-text-muted);
   animation: bob 2.4s var(--ease-out) infinite;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+.chapter[data-active='false'] .scroll-hint {
+  opacity: 0;
 }
 
 @keyframes bob {
@@ -278,6 +414,7 @@ main {
 .hotspots {
   position: absolute;
   inset: 0;
+  z-index: 2;
   overflow: hidden;
   pointer-events: none;
 }
@@ -422,10 +559,22 @@ main {
 
   .nav__links {
     display: flex;
+    order: 1;
     flex-basis: auto;
     flex-direction: row;
     gap: var(--space-8);
+    margin-left: auto;
     padding: 0;
+  }
+
+  .nav__actions {
+    order: 2;
+    margin-left: var(--space-6);
+  }
+
+  .dots {
+    display: flex;
+    right: var(--space-4);
   }
 
   /* Panel on the left; the camera frames the object on the right. */
@@ -450,15 +599,10 @@ main {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-    animation: none !important;
-  }
+/* Motion off (OS setting or the nav toggle): no transitions or looping animations. */
+[data-motion='off'] *,
+[data-motion='off'] *::before,
+[data-motion='off'] *::after {
+  transition: none !important;
+  animation: none !important;
 }

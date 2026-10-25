@@ -1,9 +1,10 @@
 import { profile } from '../data/resume'
-import { goToChapter } from '../scroll/scrollStore'
+import { goToChapter, useActiveChapter } from '../scroll/scrollStore'
 
 export function Intro() {
+  const active = useActiveChapter() === 0
   return (
-    <section id="intro" className="chapter chapter--intro" aria-labelledby="intro-title">
+    <section id="intro" className="chapter chapter--intro" data-active={active} aria-labelledby="intro-title">
       <div className="intro">
         <p className="eyebrow">{profile.subtitle}</p>
         <h1 id="intro-title" className="intro__title" tabIndex={-1} data-chapter-heading>

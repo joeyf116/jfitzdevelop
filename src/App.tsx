@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
+import { ChapterDots } from './components/ChapterDots'
 import { Nav } from './components/Nav'
 import { SceneBackdrop } from './components/SceneBackdrop'
 import { profile } from './data/resume'
-import { startScrollTracking } from './scroll/scrollStore'
+import { useMotionEnabled } from './motion/motionStore'
+import { goToChapter, startScrollTracking } from './scroll/scrollStore'
 import { About } from './sections/About'
 import { Contact } from './sections/Contact'
 import { Experience } from './sections/Experience'
@@ -10,7 +12,18 @@ import { Intro } from './sections/Intro'
 import { Skills } from './sections/Skills'
 
 export default function App() {
-  useEffect(startScrollTracking, [])
+  const motion = useMotionEnabled()
+
+  useEffect(() => startScrollTracking(motion), [motion])
+
+  // Escape zooms back out to the whole room.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') goToChapter('intro')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <>
@@ -19,6 +32,7 @@ export default function App() {
       </a>
       <SceneBackdrop />
       <Nav />
+      <ChapterDots />
       <main id="main">
         <Intro />
         <About />

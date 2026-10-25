@@ -370,10 +370,6 @@ main {
   max-width: 34rem;
 }
 
-.intro .button {
-  pointer-events: auto;
-}
-
 .intro__title {
   font-size: var(--text-hero);
   letter-spacing: -0.025em;
@@ -381,35 +377,110 @@ main {
 
 .intro__lead {
   max-width: 32ch;
-  margin: var(--space-3) 0 var(--space-6);
+  margin: var(--space-3) 0 var(--space-4);
   font-size: var(--text-lg);
   color: var(--color-text-muted);
 }
 
-.scroll-hint {
+/* "This is a room you can touch" cue under the name. */
+.intro__welcome {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  backdrop-filter: blur(8px);
+  font-size: var(--text-sm);
+}
+
+.intro__welcome-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 1.8s ease-out infinite;
+}
+
+/* Bottom bar explaining the two ways to explore. */
+.explore-hint {
   position: absolute;
   left: 50%;
   bottom: var(--space-6);
-  margin: 0;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-bg) 75%, transparent);
+  backdrop-filter: blur(8px);
   color: var(--color-text-muted);
-  animation: bob 2.4s var(--ease-out) infinite;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  transform: translateX(-50%);
   transition: opacity 0.5s var(--ease-out);
 }
 
-.chapter[data-active='false'] .scroll-hint {
+.chapter[data-active='false'] .explore-hint {
   opacity: 0;
 }
 
-@keyframes bob {
-  50% {
-    transform: translate(-50%, 6px);
+.explore-hint__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.explore-hint__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-border);
+}
+
+.explore-hint__mouse {
+  position: relative;
+  width: 14px;
+  height: 20px;
+  border: 1.6px solid currentColor;
+  border-radius: 8px;
+}
+
+.explore-hint__wheel {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 2px;
+  height: 5px;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: currentColor;
+  animation: wheel 1.6s var(--ease-out) infinite;
+}
+
+@keyframes wheel {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(7px);
   }
 }
 
+@media (max-width: 899px) {
+  .intro__title {
+    font-size: clamp(2rem, 1.5rem + 3vw, 2.6rem);
+  }
+
+  .intro__lead {
+    font-size: var(--text-base);
+  }
+}
 /* Hotspot labels floating in the 3D scene */
 .hotspots {
   position: absolute;
@@ -735,4 +806,41 @@ main {
     width: 104px;
     height: 104px;
   }
+}
+
+/* Hobbies */
+.hobbies {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hobby {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.hobby__emoji {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  font-size: 1.5rem;
+}
+
+.hobby__name {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-base);
+}
+
+.hobby__description {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }

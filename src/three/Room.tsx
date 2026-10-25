@@ -1,4 +1,6 @@
 import { palette } from '../theme/palette'
+import { Goose } from './Goose'
+import { Guitar } from './Guitar'
 import { Interactive } from './Interactive'
 import { Lamp } from './Lamp'
 import { Monitor } from './Monitor'
@@ -219,20 +221,33 @@ export function Room({ animate }: { animate: boolean }) {
       <Chair />
       <Plant />
       <Lamp />
-      <Interactive chapter="about" animate={animate}>
+      <Interactive chapter="about" animate={animate} glow={[1.6, 2.95, -2.4]}>
         <WallFrame />
       </Interactive>
-      <Interactive chapter="skills" animate={animate}>
+      <Interactive chapter="skills" animate={animate} glow={[-1.4, 3.5, -2.3]}>
         <Shelf />
       </Interactive>
-      <Interactive chapter="experience" animate={animate}>
+      <Interactive chapter="experience" animate={animate} glow={[-2.4, 2.65, -2.2]}>
         <Corkboard />
       </Interactive>
-      <Interactive chapter="projects" animate={animate}>
+      <Interactive chapter="projects" animate={animate} glow={[0.1, 2.4, -1.9]}>
         <Workstation animate={animate} />
       </Interactive>
-      <Interactive chapter="contact" animate={animate}>
+      <Interactive chapter="contact" animate={animate} glow={[-0.8, 1.95, -1.75]}>
         <Phone />
+      </Interactive>
+      {/* Hobbies: the guitar and Goose both open the same chapter. */}
+      <Interactive chapter="hobbies" animate={animate} glow={[1.4, 1.3, 1.15]}>
+        {(hovered) => (
+          <group position={[1.4, 0, 0.6]} rotation={[0, 0.75, 0]}>
+            <Goose animate={animate} excited={hovered} />
+          </group>
+        )}
+      </Interactive>
+      <Interactive chapter="hobbies" animate={animate} glow={[2.3, 1.4, -0.5]}>
+        <group position={[2.5, 0, -1.05]} rotation={[0, -0.5, 0]}>
+          <Guitar />
+        </group>
       </Interactive>
     </group>
   )

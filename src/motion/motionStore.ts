@@ -1,9 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 // Whether the site animates (camera flights, smooth scrolling, ambient effects).
-// Defaults to the OS "reduce motion" setting; visitors can override it from the nav.
+// On by default, since the motion is the point of the site; visitors can turn it off from the nav.
 const STORAGE_KEY = 'motion'
-const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
 const listeners = new Set<() => void>()
 
 function readSaved(): boolean | null {
@@ -15,7 +14,7 @@ function readSaved(): boolean | null {
   }
 }
 
-let enabled = readSaved() ?? !reduceQuery.matches
+let enabled = readSaved() ?? true
 
 function apply() {
   document.documentElement.dataset.motion = enabled ? 'on' : 'off'
@@ -23,12 +22,6 @@ function apply() {
 }
 
 apply()
-
-reduceQuery.addEventListener('change', () => {
-  if (readSaved() !== null) return
-  enabled = !reduceQuery.matches
-  apply()
-})
 
 export function isMotionEnabled() {
   return enabled

@@ -138,6 +138,20 @@ export const projects: Project[] = [
   },
 ]
 
+// Off-the-clock things in the room. Edit the copy freely; the 3D objects don't depend on it.
+export const hobbies = [
+  {
+    name: 'Guitar',
+    emoji: '🎸',
+    description: 'The acoustic by the plant gets picked up whenever I need to step away from a screen.',
+  },
+  {
+    name: 'Goose',
+    emoji: '🐕',
+    description: 'My dog and official office mate. Long legs, big grin, and strong opinions about walk time.',
+  },
+]
+
 export const education = {
   school: 'DigitalCrafts, Atlanta, GA',
   credential: 'Certificate in Software Engineering',
@@ -151,6 +165,7 @@ export const chapters = [
   { id: 'skills', label: 'Skills' },
   { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
+  { id: 'hobbies', label: 'Hobbies' },
   { id: 'contact', label: 'Contact' },
 ] as const
 

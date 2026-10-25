@@ -8,6 +8,7 @@ import { goToChapter, startScrollTracking } from './scroll/scrollStore'
 import { About } from './sections/About'
 import { Contact } from './sections/Contact'
 import { Experience } from './sections/Experience'
+import { Hobbies } from './sections/Hobbies'
 import { Intro } from './sections/Intro'
 import { Projects } from './sections/Projects'
 import { Skills } from './sections/Skills'
@@ -40,10 +41,11 @@ export default function App() {
         <Skills />
         <Experience />
         <Projects />
+        <Hobbies />
         <Contact />
       </main>
       <footer className="footer">
-        Â© {new Date().getFullYear()} {profile.name}
+        © {new Date().getFullYear()} {profile.name}
       </footer>
     </>
   )

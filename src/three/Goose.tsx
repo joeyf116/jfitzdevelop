@@ -25,8 +25,8 @@ const COAT = new Color('#1c1c22')
 const BRINDLE = new Color('#5a3a22')
 const TAN = new Color('#b9824c')
 const WHITE = new Color('#f4f1ea')
+const MOUTH = new Color('#7a2c3a')
 const tongueColor = '#ef8fa0'
-const mouthColor = '#5a1f2b'
 const collarColor = '#e0812a'
 const bedColor = '#3a4254'
 const bedRim = '#4a5368'
@@ -115,7 +115,7 @@ function useGooseGeometry() {
       },
     )
 
-    // Lower jaw with a white chin; hinges open for panting.
+    // Lower jaw: pink mouth floor on top, white chin underneath. Hinges open for panting.
     const jaw = paint(
       snoutGeometry(
         [
@@ -129,8 +129,10 @@ function useGooseGeometry() {
         0.5,
       ),
       (p, c) => {
-        const angle = Math.abs(Math.atan2(p.x, -p.y)) // 0 underneath
-        c.lerp(WHITE, smooth(1.3, 0.8, angle) * smooth(0.02, 0.08, p.z))
+        const under = Math.abs(Math.atan2(p.x, -p.y)) // 0 underneath, π on top
+        c.lerp(WHITE, smooth(1.3, 0.8, under) * smooth(0.02, 0.08, p.z))
+        // the inside of the mouth, painted on rather than a separate piece that could poke through
+        c.lerp(MOUTH, smooth(2.2, 2.6, under) * smooth(0.02, 0.05, p.z) * smooth(0.17, 0.15, p.z))
       },
     )
 
@@ -187,6 +189,9 @@ function useGooseGeometry() {
     return { head, snout, jaw, body, neck, ear, frontLeg, hindLeg, tail }
   }, [])
 }
+
+// Eyes sit on the head's surface, pushed slightly in so only a dome shows.
+const EYES = [-1, 1].map((side) => ({ side, position: [side * 0.054, 0.026, 0.109] as [number, number, number] }))
 
 // The upper muzzle sits here inside the head, so it reads as one continuous shape.
 const SNOUT_BASE: [number, number, number] = [0, -0.035, 0.07]
@@ -264,8 +269,9 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
     const pant = animate ? Math.sin(t * (excited ? 15 : 11)) : 0
     if (jaw.current) jaw.current.rotation.x = m.open * (0.3 + pant * 0.06)
     if (tongue.current) {
-      tongue.current.position.z = 0.07 + m.open * 0.025
-      tongue.current.rotation.x = m.open * (0.35 + pant * 0.05)
+      // the tip only exists while the mouth is open, drooping over the lip
+      tongue.current.scale.setScalar(Math.max(0.001, m.open))
+      tongue.current.rotation.x = m.open * (0.9 + pant * 0.12)
     }
 
     if (!animate) return
@@ -359,31 +365,33 @@ export function Goose({ animate, excited }: { animate: boolean; excited: boolean
             <mesh geometry={g.jaw} castShadow>
               {coat}
             </mesh>
-            <mesh position={[0, 0.012, 0.09]} scale={[0.04, 0.008, 0.075]}>
-              <sphereGeometry args={[1, 16, 12]} />
-              <meshStandardMaterial color={mouthColor} roughness={0.8} />
+            {/* tongue: rests on the mouth floor; the tip slides out and droops over the front
+                of the lower lip only while panting, so it never cuts through the jaw */}
+            <mesh position={[0, 0.021, 0.1]} scale={[0.024, 0.006, 0.065]}>
+              <sphereGeometry args={[1, 20, 14]} />
+              <meshStandardMaterial color={tongueColor} roughness={0.45} />
             </mesh>
-            <group ref={tongue} position={[0, 0.016, 0.07]}>
-              <mesh position={[0, 0, 0.06]} scale={[0.025, 0.008, 0.06]}>
+            <group ref={tongue} position={[0, 0.016, 0.168]}>
+              <mesh position={[0, 0, 0.026]} scale={[0.021, 0.006, 0.03]}>
                 <sphereGeometry args={[1, 20, 14]} />
                 <meshStandardMaterial color={tongueColor} roughness={0.45} />
               </mesh>
             </group>
           </group>
 
-          {/* big, warm, shiny eyes */}
-          {[-1, 1].map((side) => (
-            <group key={side} position={[side * 0.056, 0.028, 0.11]}>
-              <mesh>
-                <sphereGeometry args={[0.027, 20, 16]} />
-                <meshStandardMaterial color="#3f2412" roughness={0.15} />
+          {/* big, warm eyes, set into the face as glossy domes */}
+          {EYES.map((eye) => (
+            <group key={eye.side} position={eye.position} rotation={[-0.15, eye.side * 0.48, 0]}>
+              <mesh scale={[1, 1, 0.55]}>
+                <sphereGeometry args={[0.024, 24, 18]} />
+                <meshStandardMaterial color="#3f2412" roughness={0.12} />
               </mesh>
-              <mesh position={[0.008, 0.01, 0.022]}>
-                <sphereGeometry args={[0.009, 12, 10]} />
+              <mesh position={[0.007, 0.008, 0.011]} scale={[1, 1, 0.4]}>
+                <sphereGeometry args={[0.0065, 12, 10]} />
                 <meshBasicMaterial color="#ffffff" />
               </mesh>
-              <mesh position={[-0.007, -0.008, 0.024]}>
-                <sphereGeometry args={[0.004, 8, 8]} />
+              <mesh position={[-0.006, -0.007, 0.012]} scale={[1, 1, 0.4]}>
+                <sphereGeometry args={[0.003, 8, 8]} />
                 <meshBasicMaterial color="#ffffff" />
               </mesh>
             </group>

@@ -1,4 +1,5 @@
 import { palette } from '../theme/palette'
+import { Interactive } from './Interactive'
 import { Lamp } from './Lamp'
 import { Monitor } from './Monitor'
 import { Box, Cylinder } from './parts'
@@ -47,6 +48,31 @@ function Window() {
   )
 }
 
+// About: a framed picture on the back wall (mountains at night, a nod to getting things done anywhere).
+function WallFrame() {
+  return (
+    <group position={[1.6, 2.95, -ROOM / 2 + 0.03]}>
+      <Box size={[1.3, 1, 0.05]} color={palette.trim} />
+      <mesh position={[0, 0, 0.03]}>
+        <planeGeometry args={[1.12, 0.82]} />
+        <meshStandardMaterial color={palette.screen} />
+      </mesh>
+      <mesh position={[-0.18, -0.1, 0.035]} rotation={[0, 0, Math.PI / 2]}>
+        <circleGeometry args={[0.32, 3]} />
+        <meshStandardMaterial color={palette.accent} />
+      </mesh>
+      <mesh position={[0.2, -0.17, 0.04]} rotation={[0, 0, Math.PI / 2]}>
+        <circleGeometry args={[0.24, 3]} />
+        <meshStandardMaterial color={palette.code[1]} />
+      </mesh>
+      <mesh position={[0.32, 0.22, 0.04]}>
+        <circleGeometry args={[0.07, 24]} />
+        <meshBasicMaterial color={palette.lampLight} toneMapped={false} />
+      </mesh>
+    </group>
+  )
+}
+
 function Desk() {
   const legs: [number, number][] = [
     [-1.45, -2.85],
@@ -60,11 +86,33 @@ function Desk() {
       {legs.map(([x, z]) => (
         <Box key={`${x}${z}`} size={[0.08, DESK_Y - 0.05, 0.08]} color={palette.deskLeg} position={[x, (DESK_Y - 0.05) / 2, z]} />
       ))}
+      {/* mug */}
+      <Cylinder radiusTop={0.1} height={0.22} color={palette.mug} position={[1.2, DESK_Y + 0.16, -2.2]} />
+    </group>
+  )
+}
+
+function Workstation({ animate }: { animate: boolean }) {
+  return (
+    <group>
+      <Monitor animate={animate} />
       {/* keyboard and mouse */}
       <Box size={[0.95, 0.04, 0.3]} color={palette.trim} position={[0.1, DESK_Y + 0.07, -1.95]} />
       <Box size={[0.12, 0.04, 0.18]} color={palette.trim} position={[0.85, DESK_Y + 0.07, -1.95]} />
-      {/* mug */}
-      <Cylinder radiusTop={0.1} height={0.22} color={palette.mug} position={[1.2, DESK_Y + 0.16, -2.2]} />
+    </group>
+  )
+}
+
+// Contact: a phone and a notebook under the lamp.
+function Phone() {
+  return (
+    <group position={[-0.8, DESK_Y + 0.05, -1.95]} rotation={[0, 0.35, 0]}>
+      <Box size={[0.28, 0.025, 0.5]} color={palette.monitor} position={[0, 0.0125, 0]} roughness={0.3} />
+      <mesh position={[0, 0.027, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.24, 0.44]} />
+        <meshBasicMaterial color={palette.screen} />
+      </mesh>
+      <Box size={[0.45, 0.03, 0.6]} color={palette.books[2]} position={[-0.42, 0.015, -0.05]} rotation={[0, -0.25, 0]} />
     </group>
   )
 }
@@ -81,29 +129,29 @@ function Chair() {
   )
 }
 
+// Skills: one book per skill group.
+const BOOK_WIDTHS = [0.15, 0.12, 0.16, 0.13, 0.11, 0.14]
+const BOOKS = BOOK_WIDTHS.map((width, i) => {
+  const left = -2 + BOOK_WIDTHS.slice(0, i).reduce((sum, w) => sum + w + 0.02, 0)
+  const height = 0.38 + (i % 3) * 0.06
+  return { width, height, x: left + width / 2 }
+})
+
 function Shelf() {
-  const books = [0.14, 0.11, 0.16, 0.12, 0.1]
-  let x = -1.9
   return (
     <group position={[0, 3.2, -ROOM / 2 + 0.2]}>
-      <Box size={[1.8, 0.06, 0.4]} color={palette.desk} position={[-1.2, 0, 0]} />
-      {books.map((width, i) => {
-        const height = 0.38 + (i % 3) * 0.06
-        const book = (
-          <Box
-            key={i}
-            size={[width, height, 0.3]}
-            color={palette.books[i]}
-            position={[x + width / 2, height / 2 + 0.03, 0]}
-            rotation={[0, 0, i === 4 ? 0.25 : 0]}
-          />
-        )
-        x += width + 0.02
-        return book
-      })}
+      <Box size={[1.9, 0.06, 0.4]} color={palette.desk} position={[-1.15, 0, 0]} />
+      {BOOKS.map((book, i) => (
+        <Box
+          key={i}
+          size={[book.width, book.height, 0.3]}
+          color={palette.books[i % palette.books.length]}
+          position={[book.x, book.height / 2 + 0.03, 0]}
+        />
+      ))}
       {/* small plant on the shelf */}
-      <Cylinder radiusTop={0.1} radiusBottom={0.08} height={0.16} color={palette.pot} position={[-0.5, 0.11, 0]} />
-      <mesh position={[-0.5, 0.28, 0]} castShadow>
+      <Cylinder radiusTop={0.1} radiusBottom={0.08} height={0.16} color={palette.pot} position={[-0.45, 0.11, 0]} />
+      <mesh position={[-0.45, 0.28, 0]} castShadow>
         <icosahedronGeometry args={[0.15, 0]} />
         <meshStandardMaterial color={palette.plant} flatShading />
       </mesh>
@@ -135,12 +183,22 @@ export function Room({ animate }: { animate: boolean }) {
     <group>
       <Shell />
       <Window />
-      <Shelf />
       <Desk />
-      <Monitor animate={animate} />
-      <Lamp />
       <Chair />
       <Plant />
+      <Lamp />
+      <Interactive chapter="about" animate={animate}>
+        <WallFrame />
+      </Interactive>
+      <Interactive chapter="skills" animate={animate}>
+        <Shelf />
+      </Interactive>
+      <Interactive chapter="experience" animate={animate}>
+        <Workstation animate={animate} />
+      </Interactive>
+      <Interactive chapter="contact" animate={animate}>
+        <Phone />
+      </Interactive>
     </group>
   )
 }

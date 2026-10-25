@@ -102,9 +102,13 @@ export const education = {
   year: '2019',
 }
 
-export const navLinks = [
+// Page chapters in scroll order. Each one has a matching camera stop in src/three/cameraStops.ts.
+export const chapters = [
+  { id: 'intro', label: 'Home' },
   { id: 'about', label: 'About' },
   { id: 'skills', label: 'Skills' },
   { id: 'experience', label: 'Experience' },
   { id: 'contact', label: 'Contact' },
 ] as const
+
+export type ChapterId = (typeof chapters)[number]['id']

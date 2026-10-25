@@ -1,9 +1,9 @@
-import { Section } from '../components/Section'
+import { Chapter } from '../components/Chapter'
 import { profile } from '../data/resume'
 
 export function Contact() {
   return (
-    <Section id="contact" eyebrow="Contact" title="Let’s build something">
+    <Chapter id="contact" eyebrow="Contact" title="Let’s build something">
       <p className="prose">
         I’m always happy to talk about AI platforms, developer tooling, or a tough technical blocker.
       </p>
@@ -18,6 +18,6 @@ export function Contact() {
           GitHub
         </a>
       </div>
-    </Section>
+    </Chapter>
   )
 }

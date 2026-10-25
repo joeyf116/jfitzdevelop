@@ -1,13 +1,13 @@
-import { Section } from '../components/Section'
+import { Chapter } from '../components/Chapter'
 import { skills } from '../data/resume'
 
 export function Skills() {
   return (
-    <Section id="skills" eyebrow="Skills" title="What I work with">
-      <div className="grid">
+    <Chapter id="skills" eyebrow="Skills" title="What’s on the shelf">
+      <div className="skill-groups">
         {skills.map((group) => (
-          <article key={group.name} className="card">
-            <h3 className="card__title">{group.name}</h3>
+          <div key={group.name}>
+            <h3 className="skill-groups__name">{group.name}</h3>
             <ul className="chips">
               {group.items.map((item) => (
                 <li key={item} className="chip">
@@ -15,9 +15,9 @@ export function Skills() {
                 </li>
               ))}
             </ul>
-          </article>
+          </div>
         ))}
       </div>
-    </Section>
+    </Chapter>
   )
 }

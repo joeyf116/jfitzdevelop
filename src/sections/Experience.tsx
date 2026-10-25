@@ -1,19 +1,17 @@
-import { Section } from '../components/Section'
+import { Chapter } from '../components/Chapter'
 import { experience } from '../data/resume'
 
 export function Experience() {
   return (
-    <Section id="experience" eyebrow="Experience" title="Where I’ve made an impact">
+    <Chapter id="experience" eyebrow="Experience" title="What I’ve been building">
       <ol className="timeline">
         {experience.map((role) => (
-          <li key={role.title} className="timeline__item card">
-            <header className="timeline__header">
-              <h3 className="card__title">{role.title}</h3>
-              <p className="muted">
-                {role.company} · {role.start} – {role.end}
-              </p>
-              {role.focus && <p className="timeline__focus">{role.focus}</p>}
-            </header>
+          <li key={role.title} className="timeline__item">
+            <h3 className="timeline__title">{role.title}</h3>
+            <p className="muted small">
+              {role.company} · {role.start} – {role.end}
+              {role.focus && ` · ${role.focus}`}
+            </p>
             <ul className="timeline__points">
               {role.points.map((point) => (
                 <li key={point}>{point}</li>
@@ -22,6 +20,6 @@ export function Experience() {
           </li>
         ))}
       </ol>
-    </Section>
+    </Chapter>
   )
 }

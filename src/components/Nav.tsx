@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import { navLinks, profile } from '../data/resume'
+import { chapters, profile } from '../data/resume'
+import { useActiveChapter } from '../scroll/scrollStore'
 
 export function Nav() {
   const [open, setOpen] = useState(false)
+  const active = useActiveChapter()
   const close = () => setOpen(false)
 
   return (
     <header className="nav">
       <div className="nav__inner">
-        <a className="nav__brand" href="#top" onClick={close}>
+        <a className="nav__brand" href="#intro" onClick={close}>
           {profile.shortName}
         </a>
         <button
@@ -29,9 +31,14 @@ export function Nav() {
           </svg>
         </button>
         <nav id="nav-links" className="nav__links" data-open={open} aria-label="Primary">
-          {navLinks.map((link) => (
-            <a key={link.id} href={`#${link.id}`} onClick={close}>
-              {link.label}
+          {chapters.slice(1).map((chapter, i) => (
+            <a
+              key={chapter.id}
+              href={`#${chapter.id}`}
+              aria-current={active === i + 1 ? 'location' : undefined}
+              onClick={close}
+            >
+              {chapter.label}
             </a>
           ))}
         </nav>

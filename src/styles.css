@@ -505,6 +505,7 @@ main {
   color: var(--color-text);
   font: inherit;
   font-size: 0.8rem;
+  text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition: opacity var(--duration) var(--ease-out);
@@ -750,16 +751,6 @@ main {
   font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 0.03em;
-}
-
-.project__badge {
-  padding: 0 var(--space-2);
-  border: 2px solid var(--cartoon-ink);
-  border-radius: 999px;
-  background: #e2c37a;
-  font-family: 'Patrick Hand', var(--font-sans);
-  font-size: 0.8rem;
-  letter-spacing: 0;
 }
 
 .project__tagline {

@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { Vector2, Vector3, type PerspectiveCamera } from 'three'
-import { endFlight, getFlight, getProgress, subscribe } from '../scroll/scrollStore'
+import { getFlight, getProgress, subscribe } from '../scroll/scrollStore'
 import { resolveStop, STOP_COUNT } from './cameraStops'
 
 interface Pose {
@@ -32,7 +32,7 @@ export function CameraRig({ animate }: { animate: boolean }) {
   const size = useThree((state) => state.size)
   const current = useRef({ ...newPose(), ready: false })
   const goal = useRef(newPose())
-  const flight = useRef<{ index: number; from: Pose; start: number; duration: number } | null>(null)
+  const flight = useRef<{ id: number; index: number; from: Pose; start: number; duration: number } | null>(null)
 
   // In on-demand mode, redraw whenever the scroll position changes.
   useEffect(() => {
@@ -76,16 +76,17 @@ export function CameraRig({ animate }: { animate: boolean }) {
       cur.ready = true
     }
 
-    // Click-triggered flight.
+    // Click-triggered flight: starts from wherever the camera is right now (even mid-flight),
+    // runs as long as the page scroll it's paired with, then holds on the stop until the
+    // scroll lands. If the visitor interrupts, the flight disappears and the camera simply
+    // eases back to following the scroll from where it is.
     const requested = animate ? getFlight() : null
-    if (requested && flight.current?.index !== requested.index) {
+    if (requested && flight.current?.id !== requested.id) {
       const from = newPose()
       from.position.copy(cur.position)
       from.target.copy(cur.target)
       from.offset.copy(cur.offset)
-      const stop = resolveStop(requested.index, aspect)
-      const distance = from.position.distanceTo(stop.position)
-      flight.current = { index: requested.index, from, start: now, duration: Math.min(3.2, 1.8 + distance * 0.12) }
+      flight.current = { id: requested.id, index: requested.index, from, start: now, duration: requested.duration }
     }
     if (!requested) flight.current = null
 
@@ -103,10 +104,6 @@ export function CameraRig({ animate }: { animate: boolean }) {
       // Pull back a little mid-flight so moves between objects read as a zoom out, then in.
       away.subVectors(cur.position, cur.target).normalize()
       cur.position.addScaledVector(away, Math.sin(Math.PI * e) * f.from.position.distanceTo(stop.position) * 0.2)
-      if (raw >= 1) {
-        flight.current = null
-        endFlight()
-      }
     } else if (!animate) {
       cur.position.copy(g.position)
       cur.target.copy(g.target)

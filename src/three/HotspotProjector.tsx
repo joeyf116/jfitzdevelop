@@ -11,7 +11,7 @@ export function HotspotProjector() {
     // The camera rig moved the camera this frame; refresh its matrices before projecting.
     camera.updateMatrixWorld()
     for (const hotspot of hotspots) {
-      const el = labelElements.get(hotspot.chapter)
+      const el = labelElements.get(hotspot.id)
       if (!el) continue
       point.set(...hotspot.position).project(camera)
       const behind = point.z > 1

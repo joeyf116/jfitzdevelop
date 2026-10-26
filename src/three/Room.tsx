@@ -9,6 +9,7 @@ import { Interactive } from './Interactive'
 import { Lamp } from './Lamp'
 import { Monitor } from './Monitor'
 import { Speaker } from './Speaker'
+import { CoffeeCup } from './CoffeeCup'
 import { Box, Cylinder } from './parts'
 
 const ROOM = 6
@@ -16,6 +17,7 @@ const WALL_H = 4.2
 const DESK_Y = 1.5
 // Where Goose looks when the amp stack is hovered.
 const SPEAKER_GAZE: [number, number, number] = [-2.7, 0.9, 2.05]
+const COFFEE_GAZE: [number, number, number] = [1.2, 1.75, -2.2]
 
 function Shell() {
   return (
@@ -159,8 +161,6 @@ function Desk() {
       {legs.map(([x, z]) => (
         <Box key={`${x}${z}`} size={[0.08, DESK_Y - 0.05, 0.08]} color={palette.deskLeg} position={[x, (DESK_Y - 0.05) / 2, z]} />
       ))}
-      {/* mug */}
-      <Cylinder radiusTop={0.1} height={0.22} color={palette.mug} position={[1.2, DESK_Y + 0.16, -2.2]} />
     </group>
   )
 }
@@ -294,6 +294,10 @@ export function Room({ animate }: { animate: boolean }) {
       <Lamp />
       <Curtains />
       <StringLights animate={animate} />
+      {/* "Buy me a coffee": the mug on the desk links to Venmo. */}
+      <group position={[1.2, DESK_Y + 0.05, -2.2]}>
+        <CoffeeCup animate={animate} gaze={COFFEE_GAZE} />
+      </group>
       {/* Click the amp stack (left of the guitar) to play or stop the lofi. */}
       <group position={[-ROOM / 2 + 0.26, 0, 2.05]} rotation={[0, Math.PI / 2, 0]}>
         <Speaker animate={animate} gaze={SPEAKER_GAZE} />

@@ -10,10 +10,7 @@ export function Projects() {
           <li key={project.title} className="project">
             <ProjectArt art={project.art} />
             <div className="project__body">
-              <h3 className="project__title">
-                {project.title}
-                {project.mock && <span className="project__badge">demo</span>}
-              </h3>
+              <h3 className="project__title">{project.title}</h3>
               <p className="project__tagline">{project.tagline}</p>
               <p className="project__description">{project.description}</p>
               <ul className="project__tags">
@@ -25,7 +22,7 @@ export function Projects() {
                 <p className="project__links">
                   {project.demoUrl && (
                     <a href={project.demoUrl} target="_blank" rel="noreferrer">
-                      Live demo
+                      Live site
                     </a>
                   )}
                   {project.sourceUrl && (

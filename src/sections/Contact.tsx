@@ -17,6 +17,9 @@ export function Contact() {
         <a className="button" href={profile.github} target="_blank" rel="noreferrer">
           GitHub
         </a>
+        <a className="button" href={profile.venmo} target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">☕</span>&nbsp;Buy me a coffee
+        </a>
       </div>
     </Chapter>
   )

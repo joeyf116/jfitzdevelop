@@ -22,7 +22,7 @@ export function Projects() {
                 <p className="project__links">
                   {project.demoUrl && (
                     <a href={project.demoUrl} target="_blank" rel="noreferrer">
-                      Live site
+                      {project.demoLabel ?? 'Live site'}
                     </a>
                   )}
                   {project.sourceUrl && (

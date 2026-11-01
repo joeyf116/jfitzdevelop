@@ -4,6 +4,32 @@ import type { ProjectArt as Art } from '../data/resume'
 const INK = '#1b1b2f'
 const line = { stroke: INK, strokeWidth: 4, strokeLinecap: 'round', strokeLinejoin: 'round' } as const
 
+/** Amp GPUI: a little amp head with a glowing lamp, on a speaker cab, with a cable plugged in. */
+function Amp() {
+  return (
+    <>
+      <rect width="120" height="120" rx="18" fill="#7fd6a0" />
+      {/* cable curling in from the guitar side */}
+      <path d="M6 100c10-14 14 4 22-8s0-22 8-30" fill="none" stroke={INK} strokeWidth="4" strokeLinecap="round" />
+      {/* head */}
+      <rect x="30" y="18" width="78" height="30" rx="5" fill={INK} {...line} />
+      <rect x="35" y="35" width="68" height="9" rx="2" fill="#e2c37a" />
+      {[43, 54, 65, 76].map((x) => (
+        <circle key={x} cx={x} cy="39.5" r="3" fill={INK} />
+      ))}
+      <circle cx="94" cy="39.5" r="3.5" fill="#d84f4f" />
+      <path d="M50 26h38" stroke="#fff7e6" strokeWidth="4" strokeLinecap="round" />
+      {/* 2x12 cab */}
+      <rect x="30" y="50" width="78" height="52" rx="5" fill="#3a3f4f" {...line} />
+      <rect x="36" y="56" width="66" height="40" rx="3" fill="#c3b48f" />
+      <circle cx="53" cy="76" r="14" fill="#8d7a58" {...line} strokeWidth={3} />
+      <circle cx="85" cy="76" r="14" fill="#8d7a58" {...line} strokeWidth={3} />
+      <circle cx="53" cy="76" r="5" fill={INK} />
+      <circle cx="85" cy="76" r="5" fill={INK} />
+    </>
+  )
+}
+
 /** Southeast Scramble: a gold trophy with a black belt (red bar) draped across it. */
 function Scramble() {
   return (
@@ -50,7 +76,7 @@ function Fretboard() {
   )
 }
 
-const art = { scramble: Scramble, fretboard: Fretboard }
+const art = { amp: Amp, scramble: Scramble, fretboard: Fretboard }
 
 export function ProjectArt({ art: name }: { art: Art }) {
   const Drawing = art[name]

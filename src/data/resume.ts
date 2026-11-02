@@ -97,7 +97,7 @@ export const experience: Role[] = [
   },
 ]
 
-export type ProjectArt = 'scramble' | 'fretboard'
+export type ProjectArt = 'amp' | 'fretboard' | 'scramble'
 
 export interface Project {
   title: string
@@ -106,19 +106,22 @@ export interface Project {
   tags: string[]
   art: ProjectArt
   demoUrl?: string
+  /** Text for the demo link when it isn't a live site. */
+  demoLabel?: string
   sourceUrl?: string
 }
 
 export const projects: Project[] = [
   {
-    title: 'Southeast Scramble',
-    tagline: 'Sub only. EBI rules. Cash prize.',
+    title: 'Amp GPUI',
+    tagline: 'Plug in, load a tone, play',
     description:
-      'The website for the Southeast Scramble, a no-gi, submission-only jiu-jitsu tournament run on EBI overtime rules. Athletes apply, read the ruleset, and sponsors get in touch.',
-    tags: ['React', 'TypeScript', 'Tailwind', 'Vite'],
-    art: 'scramble',
-    demoUrl: 'https://joeyf116.github.io/southeastscramble/',
-    sourceUrl: 'https://github.com/joeyf116/southeastscramble',
+      'A desktop guitar amp and effects rig written in Rust. Plug into an audio interface, load a Neural Amp Modeler capture, and play through your speakers with no pedal or modeler box in between.',
+    tags: ['Rust', 'GPUI', 'Audio DSP', 'Neural Amp Modeler'],
+    art: 'amp',
+    demoUrl: 'https://joeyf116.github.io/amp-gpui/',
+    demoLabel: 'Docs & download',
+    sourceUrl: 'https://github.com/joeyf116/amp-gpui',
   },
   {
     title: 'Fretboard Practice',
@@ -129,6 +132,16 @@ export const projects: Project[] = [
     art: 'fretboard',
     demoUrl: 'https://joeyf116.github.io/music/',
     sourceUrl: 'https://github.com/joeyf116/music',
+  },
+  {
+    title: 'Southeast Scramble',
+    tagline: 'Sub only. EBI rules. Cash prize.',
+    description:
+      'The website for the Southeast Scramble, a no-gi, submission-only jiu-jitsu tournament run on EBI overtime rules. Athletes apply, read the ruleset, and sponsors get in touch.',
+    tags: ['React', 'TypeScript', 'Tailwind', 'Vite'],
+    art: 'scramble',
+    demoUrl: 'https://joeyf116.github.io/southeastscramble/',
+    sourceUrl: 'https://github.com/joeyf116/southeastscramble',
   },
 ]
 
